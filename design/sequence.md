@@ -8,8 +8,8 @@ sequenceDiagram
 
   C->>+ES: Connect()
   ES-->>-C: return clientId 
-  C->>+ES: open(clientId, file)
-  ES->>FS: doSomething(clientId, file)
+  C->>+ES: doSomething(clientId, filePath)
+  ES->>FS: doSomething(clientId, filePath)
   FS-->>ES: return File
   ES-->>-FC: return File
   C->>+FC: Read(file)
