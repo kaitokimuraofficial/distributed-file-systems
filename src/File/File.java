@@ -1,6 +1,9 @@
 package src.File;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.lang.Math;
+import java.nio.charset.StandardCharsets;
 
 /**
 * 1つのファイルに関する情報や内容を持つ
@@ -21,6 +24,7 @@ public class File {
     private Boolean isWriteAllowed;
     
     private byte[] fileContent;
+    private int lastPosition = -1;
 
     public static class Builder {
         private final int DEFAULTSIZE = 4096;
@@ -100,18 +104,25 @@ public class File {
     public boolean getIsWriteAllowed() {
         return isWriteAllowed;
     }
+
+    public int getLastPosition() {
+        return lastPosition;
+    }
     
     /**
     * getFileContentメソッド
     * ファイルの内容を表すbyte配列を返す
-    * @param
-    * @return ファイルの内容のbyte列
+    * @param 
+    * @return fileContentのbyte列のスライス
     */
     public byte[] getFileContent() {
         if (isReadAllowed == false) {
             return null;
         }
-        return fileContent;
+
+        // startからendまでの部分配列を取得
+        byte[] asciiBytes = Arrays.copyOfRange(fileContent, 0, lastPosition);
+        return asciiBytes;
     }
 
 
@@ -128,6 +139,10 @@ public class File {
         this.isWriteAllowed = isWriteAllowed;
     }
 
+    private void setLastPosition(int lastPosition) {
+        this.lastPosition = lastPosition;
+    } 
+
     /**
     * setFileContentメソッド
     * ファイルの内容を書き換える
@@ -139,15 +154,16 @@ public class File {
             return -1;
         }
 
-        byte[] strBytes = text.getBytes();
+        byte[] asciiBytes = text.getBytes(StandardCharsets.US_ASCII);
 
-        for (int i = 0; i < strBytes.length; i++) {
+        for (int i = 0; i < asciiBytes.length; i++) {
             if (i < DEFAULTSIZE) {
-                fileContent[i] = strBytes[i];
+                fileContent[i] = asciiBytes[i];
             } else {
                 break;
             }
         }
+        setLastPosition(Math.min(asciiBytes.length, DEFAULTSIZE));
         return text.length();
     }
 }
