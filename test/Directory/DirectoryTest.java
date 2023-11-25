@@ -37,10 +37,10 @@ public class DirectoryTest {
 
     @Test
     public void testSearch() {
-        File file1 = root.getFile(new ArrayDeque<String>(java.util.List.of("a", "b", "test.txt")));
+        File file1 = root.search(new ArrayDeque<String>(java.util.List.of("a", "b", "test.txt")));
         assertEquals("test.txt", file1.getFileName());
 
-        File file2 = root.getFile(new ArrayDeque<String>(java.util.List.of("a", "b", "tmp.txt")));
+        File file2 = root.search(new ArrayDeque<String>(java.util.List.of("a", "b", "tmp.txt")));
         assertEquals(null, file2);
     }
 }
