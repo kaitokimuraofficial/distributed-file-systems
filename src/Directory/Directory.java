@@ -19,7 +19,7 @@ public class Directory {
         return this.dirName;
     }
 
-    public File search(ArrayDeque<String> filePath) {
+    public File getFile(ArrayDeque<String> filePath) {
         File obtainedFile = null;
 
         if (filePath.isEmpty()) return null;
@@ -28,7 +28,7 @@ public class Directory {
         if (filePath.size() > 0) {
             for (Directory directory : directories) {
                 if (name.equals(directory.getDirName())) {
-                    obtainedFile = directory.search(filePath);
+                    obtainedFile = directory.getFile(filePath);
                 }
             }
         }
