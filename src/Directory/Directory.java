@@ -1,15 +1,16 @@
 package src.Directory;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 import src.File.File;
 
 public class Directory {
-    private String dirName;
-    private Directory[] directories;
-    private File[] files;
+    protected String dirName;
+    protected ArrayList<Directory> directories;
+    protected ArrayList<File> files;
     
-    public Directory(String dirName, Directory[] directories, File[] files) {
+    public Directory(String dirName, ArrayList<Directory> directories, ArrayList<File> files) {
         this.dirName = dirName;
         this.directories = directories;
         this.files = files;
@@ -26,14 +27,14 @@ public class Directory {
         final String name = filePath.poll();
         
         if (filePath.size() > 0) {
-            for (Directory directory : directories) {
+            for (Directory directory : this.directories) {
                 if (name.equals(directory.getDirName())) {
                     obtainedFile = directory.getFile(filePath);
                 }
             }
         }
         else {
-            for (File file : files) {
+            for (File file : this.files) {
                 if (name.equals(file.getFileName())) {
                     return file;
                 }
