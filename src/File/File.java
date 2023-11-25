@@ -1,9 +1,12 @@
 package src.File;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.lang.Math;
+import java.nio.charset.StandardCharsets;
 
 /**
-* 分散ファイルシステムで管理されるファイル
+* 1つのファイルに関する情報や内容を持つ
 * @author　Kaito Kimura
 */
 
@@ -21,6 +24,7 @@ public class File {
     private Boolean isWriteAllowed;
     
     private byte[] fileContent;
+    private int lastPosition = -1;
 
     public static class Builder {
         private final int DEFAULTSIZE = 4096;
@@ -64,32 +68,6 @@ public class File {
         fileContent = builder.fileContent;
     }
 
-    public int write(String text) {
-        if (isWriteAllowed == false) {
-            return -1;
-        }
-
-        byte[] strBytes = text.getBytes();
-
-        for (int i = 0; i < strBytes.length; i++) {
-            if (i < DEFAULTSIZE) {
-                fileContent[i] = strBytes[i];
-            } else {
-                break; // 配列のサイズを超えたら終了
-            }
-        }
-        return strBytes.length;
-    }
-
-    public int read() {
-        if (isReadAllowed == false) {
-            return -1;
-        }
-        String str = fileContent.toString();
-        System.out.println(str);
-        return str.length();
-    }
-
     // getter method
     public Date getCreationDate() {
         return creationDate;
@@ -127,6 +105,27 @@ public class File {
         return isWriteAllowed;
     }
 
+    public int getLastPosition() {
+        return lastPosition;
+    }
+    
+    /**
+    * getFileContentメソッド
+    * ファイルの内容を表すbyte配列を返す
+    * @param 
+    * @return fileContentのbyte列
+    */
+    public byte[] getFileContent() {
+        if (isReadAllowed == false) {
+            return null;
+        }
+
+        // startからendまでの部分配列を取得
+        byte[] asciiBytes = Arrays.copyOfRange(fileContent, 0, lastPosition);
+        return asciiBytes;
+    }
+
+
     // setter method
     public void setFileName(String fileName) {
         this.fileName = fileName;
@@ -138,5 +137,33 @@ public class File {
 
     public void setIsWriteAllowed(Boolean isWriteAllowed) {
         this.isWriteAllowed = isWriteAllowed;
+    }
+
+    private void setLastPosition(int lastPosition) {
+        this.lastPosition = lastPosition;
+    } 
+
+    /**
+    * setFileContentメソッド
+    * ファイルの内容を書き換える
+    * @param text 書き込む内容
+    * @return 書き込んだStringの長さか、失敗したら-1
+    */
+    public int setFileContent(String text) {
+        if (isWriteAllowed == false) {
+            return -1;
+        }
+
+        byte[] asciiBytes = text.getBytes(StandardCharsets.US_ASCII);
+
+        for (int i = 0; i < asciiBytes.length; i++) {
+            if (i < DEFAULTSIZE) {
+                fileContent[i] = asciiBytes[i];
+            } else {
+                break;
+            }
+        }
+        setLastPosition(Math.min(asciiBytes.length, DEFAULTSIZE));
+        return text.length();
     }
 }

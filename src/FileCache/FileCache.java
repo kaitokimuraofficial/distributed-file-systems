@@ -13,6 +13,7 @@ public class FileCache {
     private final int DEFAULTSIZE;
     private final Date creationDate;
 
+    // ここひとまずFileにしてるけど直した方が良さそう
     private File file;
     private Date lastUpdatedDate;
 
@@ -45,12 +46,12 @@ public class FileCache {
         return creationDate;
     }
 
-    public File getFile() {
-        return file;
-    }
-
     public Date getLastUpdatedDate() {
         return lastUpdatedDate;
+    }
+
+    public File getFile() {
+        return file;
     }
 
     // setter method
