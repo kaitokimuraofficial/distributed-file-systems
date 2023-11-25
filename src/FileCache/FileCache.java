@@ -1,62 +1,38 @@
 package src.FileCache;
 
-import src.File.File;
-
 import java.util.Date;
+import java.util.ArrayList;
+
+import src.Directory.Directory;
+import src.File.File;
 
 /**
 * ファイルのキャッシュ
 * @author　Kaito Kimura
+* @author　kei-0917
 */
 
 public class FileCache {
-    private final int DEFAULTSIZE;
-    private final Date creationDate;
-
-    // ここひとまずFileにしてるけど直した方が良さそう
-    private File file;
+    private Directory root;
     private Date lastUpdatedDate;
 
-    public static class Builder {
-        private final int DEFAULTSIZE = 4096;
-        private final Date creationDate;
-
-        public Builder() {
-            this.creationDate = new Date();
-        }
-
-        public FileCache build() {
-            return new FileCache(this);
-        }
-    }
-
-    private FileCache(Builder builder) {
-        DEFAULTSIZE = builder.DEFAULTSIZE;
-        creationDate = builder.creationDate;
-
-        lastUpdatedDate = builder.creationDate;
+    public FileCache() {
+        this.root = new Directory("root", new ArrayList<Directory>(), new ArrayList<File>());
+        this.lastUpdatedDate = new Date();
     }
 
     // getter method
-    public int getDEFAULTSIZE() {
-        return DEFAULTSIZE;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
     public Date getLastUpdatedDate() {
-        return lastUpdatedDate;
+        return this.lastUpdatedDate;
     }
 
-    public File getFile() {
-        return file;
+    public File getFile(String filePath) {
+        return this.root.getFile(filePath);
     }
 
     // setter method
-    public void setFile(File file) {
-        this.file = file;
+    public void setFile(String filePath, File updatedFile) {
+        this.root.setFile(filePath, updatedFile);
         this.lastUpdatedDate = new Date();
     }
 }
