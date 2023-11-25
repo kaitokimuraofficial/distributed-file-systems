@@ -22,7 +22,7 @@ classDiagram
     -Directory[] directories;
     -File[] files;
 
-    -File search(ArrayDeque<String>)
+    -File getFile(ArrayDeque<String>)
   }
 
 ```
