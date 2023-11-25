@@ -1,0 +1,19 @@
+#!/bin/bash
+
+file_name="$1"
+
+if [ -z "$file_name" ]; then
+  echo "ファイル名を指定してください"
+  exit 1
+fi
+
+# .java ファイルをコンパイルして .class ファイルを作成
+javac "$file_name"
+
+# コンパイルされた .class ファイルがある場合、実行する
+if [ -e "${file_name%.java}.class" ]; then
+  java "${file_name%.java}"
+else
+  echo "コンパイルエラーが発生しました"
+  exit 1
+fi

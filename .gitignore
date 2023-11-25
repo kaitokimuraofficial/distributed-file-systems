@@ -1,0 +1,5 @@
+/docs
+*.class
+
+.DS_Store
+.vscode/
