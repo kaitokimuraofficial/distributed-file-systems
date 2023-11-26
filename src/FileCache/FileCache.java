@@ -21,16 +21,33 @@ public class FileCache {
         this.lastUpdatedDate = new Date();
     }
 
-    // getter method
+    /**
+    * getLastUpdatedDateメソッド
+    * キャッシュが最後に変更された日時を返す
+    * @return Date
+    */
     public Date getLastUpdatedDate() {
         return this.lastUpdatedDate;
     }
 
+    /**
+    * getFileメソッド
+    * 指定したファイルを取得する
+    * @param filePath 見つけたいFileのパス
+    * @return File
+    */
     public File getFile(String filePath) {
         return this.root.getFile(filePath);
     }
 
-    // setter method
+    /**
+    * setFileメソッド
+    * 指定したファイルを更新する
+    * ファイルが存在しない場合、新たに作成する
+    * @param filePath 見つけたいFileのパス
+    * @param updatedFile 変更後のファイル
+    * @return void
+    */
     public void setFile(String filePath, File updatedFile) {
         this.root.setFile(filePath, updatedFile);
         this.lastUpdatedDate = new Date();

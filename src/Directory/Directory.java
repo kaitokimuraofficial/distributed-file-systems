@@ -22,24 +22,58 @@ public class Directory {
         this.files = files;
     }
 
+    /**
+    * getDirNameメソッド
+    * ディレクトリの名前を返す
+    * ClientがあるFileの内容を表示したい場面
+    * @return String
+    */
     public String getDirName() {
         return this.dirName;
     }
 
+    /**
+    * convertStringToArrayListメソッド
+    * filePathをString型 -> ArrayDeque<String>型に変換
+    * e.g. "/a/b/test.txt" -> new ArrayDeque<String>(java.util.List.of("a", "b", "test.txt"))
+    * @param filePath Fileのパス
+    * @return ArrayDeque<String>
+    */
     public ArrayDeque<String> convertStringToArrayList(String filePath) {
         String[] filePathArray = filePath.split("/");
         ArrayDeque<String> filePathArrayList = new ArrayDeque<String>(Arrays.asList(filePathArray).subList(1, filePathArray.length));
         return filePathArrayList;
     }
 
+    /**
+    * getFileメソッド
+    * 指定したファイルを取得する
+    * @param filePath 見つけたいFileのパス
+    * @return File
+    */
     public File getFile(String filePath) {
         return getFile(this.convertStringToArrayList(filePath));
     }
 
+    /**
+    * setFileメソッド
+    * 指定したファイルを更新する
+    * ファイルが存在しない場合、新たに作成する
+    * @param filePath 見つけたいFileのパス
+    * @param updatedFile 変更後のファイル
+    * @return void
+    */
     public void setFile(String filePath, File updatedFile) {
         setFile(this.convertStringToArrayList(filePath), updatedFile);
     }
 
+    /**
+    * getFileメソッド
+    * filePathをArrayDeque<String>型に変更したもの
+    * 内部で呼び出され、Executor側からは見えない
+    * @param filePath 見つけたいFileのパス
+    * @return File
+    */
     private File getFile(ArrayDeque<String> filePath) {
         File obtainedFile = null;
 
@@ -64,6 +98,14 @@ public class Directory {
         return obtainedFile;
     }
 
+    /**
+    * setFileメソッド
+    * filePathをArrayDeque<String>型に変更したもの
+    * 内部で呼び出され、Executor側からは見えない
+    * @param filePath 見つけたいFileのパス
+    * @param updatedFile 変更後のファイル
+    * @return void
+    */
     private void setFile(ArrayDeque<String> filePath, File updatedFile) {
         if (filePath.isEmpty()) return;
         final String name = filePath.poll();
