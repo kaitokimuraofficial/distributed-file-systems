@@ -1,4 +1,4 @@
-package src;
+package src.EntryServer;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Date;
