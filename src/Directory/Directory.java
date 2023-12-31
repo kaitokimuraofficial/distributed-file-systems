@@ -8,7 +8,8 @@ import src.File.File;
 
 /**
 * ディレクトリ
-* @author　kei-0917
+* @author  kei-0917
+* @author  kaitokimuraofficial
 */
 
 public class Directory {
@@ -70,7 +71,7 @@ public class Directory {
     /**
     * getFileメソッド
     * filePathをArrayDeque<String>型に変更したもの
-    * 内部で呼び出され、Executor側からは見えない
+    * 内部で呼び出され、Handler側からは見えない
     * @param filePath 見つけたいFileのパス
     * @return File
     */
@@ -101,7 +102,7 @@ public class Directory {
     /**
     * setFileメソッド
     * filePathをArrayDeque<String>型に変更したもの
-    * 内部で呼び出され、Executor側からは見えない
+    * 内部で呼び出され、Handler側からは見えない
     * @param filePath 見つけたいFileのパス
     * @param updatedFile 変更後のファイル
     * @return void
