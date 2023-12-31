@@ -10,35 +10,52 @@ import src.FileCache.FileCache;
 /**
 * FileCacheクラスの単体テスト
 * @author　Kaito Kimura
+* @author　kei-0917
 */
 
 public class FileCacheTest {
-    File file1;
-    FileCache fileCache1;
+    /*
+    Example Tree Structure of File Server: 
+                   root
+                  /    \
+                 a      d
+               /   \
+              b     c
+              |
+          test.txt
+    
+    Initial Tree Structure of File Cache: 
+                   root
+    
+    Final Tree Structure of File Cache: 
+                   root
+                  /
+                 a
+               /
+              b
+              |
+          test.txt
+    */
+
+    FileCache fileCache;
 
     @Before
     public void setUp() {
-        file1 = new File.Builder(1, "test")
-                .isReadAllowed(true).isWriteAllowed(true).build();
-        fileCache1 = new FileCache.Builder().build();
-        fileCache1.setFile(file1);
+        fileCache = new FileCache();
     }
 
     @Test
-    public void testGetDEFAULTSIZE() {
-        assertEquals(4096, fileCache1.getDEFAULTSIZE());
-    }
+    public void testSetFile() {
+        String filePath = "/a/b/test.txt";
+        File file = new File.Builder(1, "test.txt")
+                        .isReadAllowed(true).isWriteAllowed(true).build();
 
-    @Test
-    public void testGetFile() {
-        assertEquals(file1, fileCache1.getFile());
-    }
+        File obtainedFile = fileCache.getFile(filePath);
+        assertEquals(null, obtainedFile);
+        
+        fileCache.setFile(filePath, file);
 
-    @Test
-    public void testSetFileCach() {
-        File file2 = new File.Builder(1, "test2").
-        isReadAllowed(true).isWriteAllowed(true).build();
-        fileCache1.setFile(file2);
-        assertEquals(file2, fileCache1.getFile());
+        obtainedFile = fileCache.getFile(filePath);
+        assertEquals("test.txt", obtainedFile.getFileName());
     }
 }

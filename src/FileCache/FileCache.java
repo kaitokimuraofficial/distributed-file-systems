@@ -1,62 +1,55 @@
 package src.FileCache;
 
-import src.File.File;
-
 import java.util.Date;
+import java.util.ArrayList;
+
+import src.Directory.Directory;
+import src.File.File;
 
 /**
 * ファイルのキャッシュ
 * @author　Kaito Kimura
+* @author　kei-0917
 */
 
 public class FileCache {
-    private final int DEFAULTSIZE;
-    private final Date creationDate;
-
-    // ここひとまずFileにしてるけど直した方が良さそう
-    private File file;
+    private Directory root;
     private Date lastUpdatedDate;
 
-    public static class Builder {
-        private final int DEFAULTSIZE = 4096;
-        private final Date creationDate;
-
-        public Builder() {
-            this.creationDate = new Date();
-        }
-
-        public FileCache build() {
-            return new FileCache(this);
-        }
+    public FileCache() {
+        this.root = new Directory("root", new ArrayList<Directory>(), new ArrayList<File>());
+        this.lastUpdatedDate = new Date();
     }
 
-    private FileCache(Builder builder) {
-        DEFAULTSIZE = builder.DEFAULTSIZE;
-        creationDate = builder.creationDate;
-
-        lastUpdatedDate = builder.creationDate;
-    }
-
-    // getter method
-    public int getDEFAULTSIZE() {
-        return DEFAULTSIZE;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
+    /**
+    * getLastUpdatedDateメソッド
+    * キャッシュが最後に変更された日時を返す
+    * @return Date
+    */
     public Date getLastUpdatedDate() {
-        return lastUpdatedDate;
+        return this.lastUpdatedDate;
     }
 
-    public File getFile() {
-        return file;
+    /**
+    * getFileメソッド
+    * 指定したファイルを取得する
+    * @param filePath 見つけたいFileのパス
+    * @return File
+    */
+    public File getFile(String filePath) {
+        return this.root.getFile(filePath);
     }
 
-    // setter method
-    public void setFile(File file) {
-        this.file = file;
+    /**
+    * setFileメソッド
+    * 指定したファイルを更新する
+    * ファイルが存在しない場合、新たに作成する
+    * @param filePath 見つけたいFileのパス
+    * @param updatedFile 変更後のファイル
+    * @return void
+    */
+    public void setFile(String filePath, File updatedFile) {
+        this.root.setFile(filePath, updatedFile);
         this.lastUpdatedDate = new Date();
     }
 }
