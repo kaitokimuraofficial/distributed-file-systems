@@ -1,6 +1,6 @@
 package src.FileCache;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import src.Directory.Directory;
@@ -8,17 +8,17 @@ import src.File.File;
 
 /**
 * ファイルのキャッシュ
-* @author　Kaito Kimura
+* @author  kaitokimuraofficial
 * @author　kei-0917
 */
 
 public class FileCache {
     private Directory root;
-    private Date lastUpdatedDate;
+    private LocalDateTime lastUpdatedDate;
 
     public FileCache() {
         this.root = new Directory("root", new ArrayList<Directory>(), new ArrayList<File>());
-        this.lastUpdatedDate = new Date();
+        this.lastUpdatedDate = LocalDateTime.now();
     }
 
     /**
@@ -26,7 +26,7 @@ public class FileCache {
     * キャッシュが最後に変更された日時を返す
     * @return Date
     */
-    public Date getLastUpdatedDate() {
+    public LocalDateTime getLastUpdatedDate() {
         return this.lastUpdatedDate;
     }
 
@@ -50,6 +50,6 @@ public class FileCache {
     */
     public void setFile(String filePath, File updatedFile) {
         this.root.setFile(filePath, updatedFile);
-        this.lastUpdatedDate = new Date();
+        this.lastUpdatedDate = LocalDateTime.now();
     }
 }
