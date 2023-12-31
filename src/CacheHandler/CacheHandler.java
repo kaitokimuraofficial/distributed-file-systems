@@ -1,4 +1,4 @@
-package src.CacheExecuter;
+package src.CacheHandler;
 
 import java.util.Arrays;
 
@@ -15,13 +15,13 @@ import src.FileCache.FileCache;
 /**
 * して欲しいこと
 * 1, search()の実装
-* 2, cacheExecuterが持つFileCacheの中身を更新するsetFileCache()の実装
+* 2, cacheHandlerが持つFileCacheの中身を更新するsetFileCache()の実装
 * 3, (できればテスト)
 * 
 * 修正は相談の上でガンガンしてもOK！
 */
 
-public class CacheExecuter {
+public class CacheHandler {
     private final FileCache fileCache;
     private final int ownedBy;
 
@@ -34,12 +34,12 @@ public class CacheExecuter {
             this.ownedBy = ownedBy;
         }
 
-        public CacheExecuter build() {
-            return new CacheExecuter(this);
+        public CacheHandler build() {
+            return new CacheHandler(this);
         }
     }
 
-    private CacheExecuter(Builder builder) {
+    private CacheHandler(Builder builder) {
         fileCache = builder.fileCache;
         ownedBy = builder.ownedBy;
     }
@@ -62,7 +62,7 @@ public class CacheExecuter {
     /**
     * Clientクラスからの命令は
     * File.fileContentに対するRead, Writeのみだと仮定
-    * CacheExecuter、FileCache、Clientの関係はsequence.mdを参考にしてください
+    * CacheHandler、FileCache、Clientの関係はsequence.mdを参考にしてください
     */
 
     /**
