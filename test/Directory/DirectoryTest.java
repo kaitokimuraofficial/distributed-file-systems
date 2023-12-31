@@ -2,8 +2,8 @@ package test.Directory;
 
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.assertEquals;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ import src.File.File;
 
 /**
 * Directoryクラスの単体テスト
-* @author　kei-0917
+* @author  kei-0917
 */
 
 public class DirectoryTest {
@@ -32,8 +32,7 @@ public class DirectoryTest {
 
     @Before
     public void setUp() {
-        file = new File.Builder(1, "test.txt")
-                    .isReadAllowed(true).isWriteAllowed(true).build();
+        file = new File(1, "test.txt", true, true);
         b = new Directory("b", null, new ArrayList<File>(List.of(file)));
         c = new Directory("c", null, null);
         a = new Directory("a", new ArrayList<Directory>(List.of(b, c)), null);
