@@ -9,7 +9,7 @@ import src.FileCache.FileCache;
 
 /**
 * FileCacheクラスの単体テスト
-* @author　Kaito Kimura
+* @author  kaitokimuraofficial
 * @author　kei-0917
 */
 
@@ -47,8 +47,7 @@ public class FileCacheTest {
     @Test
     public void testSetFile() {
         String filePath = "/a/b/test.txt";
-        File file = new File.Builder(1, "test.txt")
-                        .isReadAllowed(true).isWriteAllowed(true).build();
+        File file = new File(1, "test.txt", true, true);
 
         File obtainedFile = fileCache.getFile(filePath);
         assertEquals(null, obtainedFile);
