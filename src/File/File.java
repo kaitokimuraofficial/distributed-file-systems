@@ -1,92 +1,59 @@
 package src.File;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.lang.Math;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 /**
-* 1つのファイルに関する情報や内容を持つ
-* @author　Kaito Kimura
+* ファイル
+* @author  kaitokimuraofficial
 */
 
 public class File {
-    private final int DEFAULTSIZE;
-    private final Date creationDate;
     private final int createdBy;
+    private final LocalDateTime creationDate;
+    private final int DEFAULTSIZE = 4096;
 
     private String fileName;
-    private Date lastModifiedDate;
-    private int lastModiiedBy;
-    private int readCount = 0;
-    private int writeCount = 0;
+    private byte[] fileContent = new byte[DEFAULTSIZE];
     private Boolean isReadAllowed;
     private Boolean isWriteAllowed;
-    
-    private byte[] fileContent;
+    private int lastModifiedBy;
+    private LocalDateTime lastModifiedDate;
     private int lastPosition = -1;
+    private int readCount = 0;
+    private int writeCount = 0;
 
-    public static class Builder {
-        private final int DEFAULTSIZE = 4096;
-        private final Date creationDate;
-        private final int createdBy;
-
-        private String fileName;
-        private Boolean isReadAllowed = false;
-        private Boolean isWriteAllowed = false;
-        private byte[] fileContent = new byte[DEFAULTSIZE];
-
-        public Builder(int createdBy, String fileName) {
-            this.creationDate = new Date();
-            this.createdBy = createdBy;
-            this.fileName = fileName;
-        }
-
-        public Builder isReadAllowed(Boolean val) {
-            isReadAllowed = val; return this;
-        }
-
-        public Builder isWriteAllowed(Boolean val) {
-            isWriteAllowed = val; return this;
-        }
-
-        public File build() {
-            return new File(this);
-        }
-    }
-
-    private File(Builder builder) {
-        DEFAULTSIZE = builder.DEFAULTSIZE;
-        creationDate = builder.creationDate;
-        createdBy = builder.createdBy;
-
-        fileName = builder.fileName;
-        lastModifiedDate = builder.creationDate;
-        lastModiiedBy = builder.createdBy;
-        isReadAllowed = builder.isReadAllowed;
-        isWriteAllowed = builder.isWriteAllowed;
-        fileContent = builder.fileContent;
+    public File(int createdBy, String fileName, Boolean isReadAllowed, Boolean isWriteAllowed) {
+        this.createdBy = createdBy;
+        this.creationDate = LocalDateTime.now();
+        this.fileName = fileName;
+        this.isReadAllowed = isReadAllowed;
+        this.isWriteAllowed = isWriteAllowed;
+        this.lastModifiedDate = this.creationDate;
+        this.lastModifiedBy = this.createdBy;
     }
 
     // getter method
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
     public int getCreatedBy() {
         return createdBy;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
     }
 
     public String getFileName() {
         return fileName;
     }
     
-    public Date getLastModifiedDate() {
+    public LocalDateTime getLastModifiedDate() {
         return lastModifiedDate;
     }
     
-    public int getLastModiiedBy() {
-        return lastModiiedBy;
+    public int getLastModifiedBy() {
+        return lastModifiedBy;
     }
 
     public int getReadCount() {
@@ -120,11 +87,14 @@ public class File {
             return null;
         }
 
+        if (lastPosition < 0) {
+            return null;
+        }
+
         // startからendまでの部分配列を取得
         byte[] asciiBytes = Arrays.copyOfRange(fileContent, 0, lastPosition);
         return asciiBytes;
     }
-
 
     // setter method
     public void setFileName(String fileName) {

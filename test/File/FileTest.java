@@ -19,9 +19,7 @@ public class FileTest {
 
     @Before
     public void setup() {
-        file1 = new File.Builder(1, "test").
-        isReadAllowed(true).isWriteAllowed(true).build();
-        file1.setFileContent("FUCK");
+        file1 = new File(1, "test", true, true);
     }
 
     @Test
@@ -45,18 +43,27 @@ public class FileTest {
     }
 
     @Test
-    public void testGetLastModiiedBy() {
-        assertEquals(1, file1.getCreatedBy());
+    public void testGetLastModifiedBy() {
+        assertEquals(1, file1.getLastModifiedBy());
     }
-    
+
     @Test
     public void testSetFileContent() {
+        String text = "FUCK";
+        file1.setFileContent(text);
         assertEquals(4, file1.setFileContent("FUCK"));
     }
 
     @Test
+    public void testGetLastPosition() {
+        String text = "FUCK";
+        file1.setFileContent(text);
+        assertEquals(4, file1.getLastPosition());
+    }
+
+    @Test
     public void testGetFileContentWhenLengthIsWithinLimit() {
-        String text = "SHIT";
+        String text = "FUCK";
         file1.setFileContent(text);
         assertArrayEquals(text.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
     }
@@ -74,6 +81,16 @@ public class FileTest {
         file1.setFileContent(text);
         String textExpected = "FUCK".repeat(1024);
         assertArrayEquals(textExpected.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
+    }
+
+    @Test
+    public void testGetFileContentWithSomeSetContent() {
+        String text1 = "FUCK";
+        String text2 = "I am using Java.";
+        file1.setFileContent(text1);
+        file1.setFileContent(text2);
+        assertArrayEquals(text2.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
+        assertEquals(16, file1.getLastPosition());
     }
 
     @Test
