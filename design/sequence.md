@@ -1,3 +1,4 @@
+# ファイルの受け取り
 ```mermaid
 sequenceDiagram
 
@@ -8,32 +9,46 @@ sequenceDiagram
 
   C->>+ES: Connect()
   ES-->>-C: return clientId 
-  C->>+ES: doSomething(clientId, filePath)
-  ES->>FS: doSomething(clientId, filePath)
+  C->>+ES: getFile(clientId, filePath)
+  ES->>FS: getFile(clientId, filePath)
   FS-->>ES: return File
   ES-->>-FC: return File
-  C->>+FC: Read(file)
-  FC-->>-C: return File
 ```
 - 全てのClientはEntryServer(ES)にのみアクセスする
 - ESはClientにclientIdを付与する
 - ESとFSがやりとりしてファイルに関する操作を行う
 - clientIdとファイルに関する命令を受けてESがFSに対してなんらかの操作をする。もしファイルの受け渡しがあればそれをClientのFileCache(FC)に渡す
 
+# FileCacheからファイルをRead
 ```mermaid
 sequenceDiagram
 
   actor C as Client
-  participant CE as CacheExecuter
+  participant CE as CacheHandler
   participant FC as FileCache
 
-  C->>+CE: Order()
-  CE->>+FC: getMethod, setMethod
-  FC-->>-CE: return field of File
-  CE->>-C:  return field of File
+  C->>+CE: Read(filePath)
+  CE->>+FC: getMethod(file)
+  FC-->>-CE: return File
+  CE->>-C:  return File
 ```
-- ClientはCacheExecuterを通じてFileCacheからFileに関する情報を得る
-**CacheExecuterに仲立ちさせる理由**
-  - 他のClientのwriteによってFileCache内の更新が起こるときに、その更新をFileCacheではなく、CacheExecuterにしてほしいから。
+
+# FileCacheからファイルをwrite
+```mermaid
+sequenceDiagram
+
+  actor C as Client
+  participant CE as CacheHandler
+  participant FC as FileCache
+
+  C->>+CE: Write(file)
+  CE->>+FC: setMethod(file)
+  FC-->>-CE: return bool
+  CE->>-C:  return bool
+```
+
+- ClientはCacheHandlerを通じてFileCacheからFileに関する情報を得る
+**CacheHandlerを挟む理由**
+  - 他のClientのwriteによってFileCache内の更新が起こるときに、その更新をFileCacheではなく、CacheHandlerにしてほしいから。
   - FileCacheはあくまでもFileの保管庫であり、その保管庫を操作するのは保管庫自身ではない方がいいと思う。
   - Clientに担当させないのは、ユーザーにFileCacheの管理を意識させたくないから
