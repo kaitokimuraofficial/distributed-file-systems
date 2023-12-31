@@ -2,7 +2,7 @@ package docsTemplate;
 
 /**
 * Javadoc用コメントのテストプログラム
-* @author　Kaito Kimura
+* @author  kaitokimuraofficial
 */
  
 public class JavadocTemplate{
