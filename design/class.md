@@ -34,6 +34,7 @@ classDiagram
 
   class Client{
 
+    +open()
   }
 
   class CacheExecuter {
