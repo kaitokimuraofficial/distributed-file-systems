@@ -31,11 +31,11 @@ public class CacheHandler {
 
     /**
     * searchメソッド
-    * FileCacheのDirectoryクラスからfileNameのFileを見つけて返す
-    * @param fileName 見つけたいFileの名前
+    * FileCacheのDirectoryクラスからfilePathのFileを見つけて返す
+    * @param filePath 見つけたいFileのパス
     * @return 見つけたいFile
     */
-    private File search(String fileName) {
+    private File search(String filePath) {
         return File
     }
 
@@ -53,11 +53,11 @@ public class CacheHandler {
     * getFileContentメソッド
     * Fileの内容をString変換して返す
     * ClientがあるFileについてReadしている場面
-    * @param fileName 見つけたいFileの名前
+    * @param filePath 見つけたいFileのパス
     * @return 見つけたいFileのfileContent
     */
-    public String getFileContent(String fineName) {
-        File targetFile = search(fineName);
+    public String getFileContent(String filePath) {
+        File targetFile = search(filePath);
         return Arrays.toString(targetFile.getFileContent());
     }
 
@@ -65,7 +65,7 @@ public class CacheHandler {
     * setFileContentメソッド
     * Fileの内容を変更する
     * ClientがWriteしている場面
-    * @param fileName 見つけたいFileの名前
+    * @param filePath 見つけたいFileのパス
     * @return 成功したら書き込んだtextの文字数、失敗したら-1
     */
     public int setFileContent(String fineName, String text) {
