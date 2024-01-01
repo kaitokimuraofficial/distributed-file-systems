@@ -1,43 +1,45 @@
 ```mermaid
 classDiagram
-  File "0..*" --|> "1" Directory
+  File "0..*" -- "1" Directory
 
   class File{
-    -final int DEFAULTSIZE
-    -final Date creationDate
-    -final int createdBy
+    final int createdBy
+    final LocalDateTime creationDate
+    final int DEFAULTSIZE
 
-    -Boolean isReadAllowed
-    -Boolean isWriteAllowed
+    Boolean isReadAllowed
+    Boolean isWriteAllowed
 
-    -byte[] fileContent
-    -int lastPosition
+    byte[] fileContent
+    int lastPosition
 
-    +byte[] getFileContent()
-    +int setFileContent(String)
+    byte[] getFileContent()
+    int setFileContent(String)
   }
 
   class Directory{
-    -String name;
-    -Directory[] directories;
-    -File[] files;
+    String dirName
+    ArrayList<Directory> directories
+    ArrayList<File> files
 
-    -File search(ArrayDeque<String>)
+    String getDirName()
+    File getFile(String)
+    void setFile(String, File)
   }
 
 ```
 
 ```mermaid
 classDiagram
-  Client "1" *-- "1" CacheExecuter
-  CacheExecuter "1" *-- "1" FileCache
+  Client "1" *-- "1" CacheHandler
+  CacheHandler "1" *-- "1" FileCache
 
   class Client{
 
     +open()
   }
 
-  class CacheExecuter {
+  class CacheHandler {
     -final FileCache fileCache
     -final int ownedBy;
 
@@ -46,28 +48,22 @@ classDiagram
     +int getOwnedBy()
 
     
-    +String getFileContent(String fineName)
+    +String getFileContent(String )
 
-    +int setFileContent(String fineName, String text)
+    +int setFileContent(String, String)
 
-    +Boolean setFileCache(Directory direcotry)
+    +Boolean setFileCache(Directory)
   }
   
   class FileCache{
-    -final int DEFAULTSIZE
-    -final Date creationDate
-    -final int createdBy
+    Directory root
+    LocalDateTime lastUpdateDate
 
-    -Boolean isReadAllowed
-    -Boolean isWriteAllowed
-
-    -byte[] fileContent
-    -int lastPosition
-
-    +File getFile()
-    +void setFile(file)
+    File getFile()
+    void setFile(File)
   }
 
 ```
 
-CacehExecuterを間に挟むことで、ClientがFileに関する好きな情報をgetしたりsetするのを簡単にする
+CacheHandlerを間に挟むことで、
+ClientがFileに関する情報をget/setするのを助ける

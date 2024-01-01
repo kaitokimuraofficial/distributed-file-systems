@@ -9,7 +9,7 @@ import src.FileCache.FileCache;
 
 /**
 * ファイルのキャッシュを操作・管理するクラス
-* @author　Kaito Kimura
+* @author  kaitokimuraofficial
 */
 
 /**
@@ -18,30 +18,15 @@ import src.FileCache.FileCache;
 * 2, cacheHandlerが持つFileCacheの中身を更新するsetFileCache()の実装
 * 3, (できればテスト)
 * 
-* 修正は相談の上でガンガンしてもOK！
 */
 
 public class CacheHandler {
     private final FileCache fileCache;
     private final int ownedBy;
 
-    public static class Builder {
-        private final FileCache fileCache;
-        private final int ownedBy;
-        
-        public Builder(int ownedBy) {
-            this.fileCache = new FileCache.Builder().build();
-            this.ownedBy = ownedBy;
-        }
-
-        public CacheHandler build() {
-            return new CacheHandler(this);
-        }
-    }
-
-    private CacheHandler(Builder builder) {
-        fileCache = builder.fileCache;
-        ownedBy = builder.ownedBy;
+    private CacheHandler(int ownedBy) {
+        fileCache = new FileCache();
+        this.ownedBy = ownedBy;
     }
 
     /**
@@ -62,7 +47,6 @@ public class CacheHandler {
     /**
     * Clientクラスからの命令は
     * File.fileContentに対するRead, Writeのみだと仮定
-    * CacheHandler、FileCache、Clientの関係はsequence.mdを参考にしてください
     */
 
     /**
@@ -99,6 +83,6 @@ public class CacheHandler {
     * @return 成功したらtrue、失敗したらfalse
     */
     public Boolean setFileCache(Directory direcotry) {
-        this.fileCache.setDirectories() = direcotry;
+        this.fileCache.setDirectories() = directory;
     }
 }

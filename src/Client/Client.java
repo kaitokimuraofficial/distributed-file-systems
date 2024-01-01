@@ -1,7 +1,7 @@
 package src.Client;
 
 
-import src.CacheExecuter.CacheExecuter;
+import src.CacheHandler.CacheHandler;
 
 /**
 * 分散ファイルシステムを使用するクライアント
@@ -10,12 +10,12 @@ import src.CacheExecuter.CacheExecuter;
 
 /**
 * EntryServerやFileServerが存在しない仮定でのClientクラスの基本形
-* 内部でCacheExecuterをもち、このcacheExecuterに対してread()、write()を行う
+* 内部でCacheHandlerをもち、このcacheHandlerに対してread()、write()を行う
 *
 *
 */
 public class Client {
-    private CacheExecuter cacheExecuter;
+    private CacheHandler cacheHandler;
 
     public Client() {
 
@@ -29,7 +29,7 @@ public class Client {
     * @return void
     */
     public void read(String filePath) {
-        String fileContent = cacheExecuter.getFileContent(filePath);
+        String fileContent = cacheHandler.getFileContent(filePath);
         System.out.println(fileContent);
     }
 
@@ -42,9 +42,9 @@ public class Client {
     * @return void
     */
     public void write(String filePath, String text) {
-        int res = cacheExecuter.setFileContent(filePath, text);
+        int res = cacheHandler.setFileContent(filePath, text);
 
-        // cacheExecuterがsetFileContent()に失敗した
+        // cacheHandlerがsetFileContent()に失敗した
         if (res<0) {
             System.out.println("Failed to write");
             return;
