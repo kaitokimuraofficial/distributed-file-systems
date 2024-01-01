@@ -70,7 +70,9 @@ public class CacheHandler {
     */
     public int setFileContent(String filePath, String text) {
         File targetFile = this.search(filePath);
+        if (targetFile == null) return -1;
         int len = targetFile.setFileContent(text);
+        if (len != -1) this.fileCache.setFile(filePath, targetFile);
         return len;
     }
 
