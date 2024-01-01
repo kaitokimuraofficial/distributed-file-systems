@@ -25,7 +25,7 @@ public class CacheHandler {
     private final int ownedBy;
 
     private CacheHandler(int ownedBy) {
-        fileCache = new FileCache();
+        this.fileCache = new FileCache();
         this.ownedBy = ownedBy;
     }
 
@@ -68,8 +68,8 @@ public class CacheHandler {
     * @param filePath 見つけたいFileのパス
     * @return 成功したら書き込んだtextの文字数、失敗したら-1
     */
-    public int setFileContent(String fineName, String text) {
-        File targetFile = search(fineName);
+    public int setFileContent(String filePath, String text) {
+        File targetFile = search(filePath);
         int len = targetFile.setFileContent(text);
         return len;
     }
@@ -82,7 +82,7 @@ public class CacheHandler {
     * @param directory 置き換える内容
     * @return 成功したらtrue、失敗したらfalse
     */
-    public Boolean setFileCache(Directory direcotry) {
+    public Boolean setFileCache(Directory directory) {
         this.fileCache.setDirectories() = directory;
     }
 }
