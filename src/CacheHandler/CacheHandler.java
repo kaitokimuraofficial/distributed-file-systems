@@ -36,7 +36,7 @@ public class CacheHandler {
     * @return 見つけたいFile
     */
     private File search(String filePath) {
-        return File
+        return this.fileCache.getFile(filePath);
     }
 
     // getter method
