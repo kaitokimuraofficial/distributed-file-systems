@@ -79,10 +79,12 @@ public class CacheHandler {
     * setFileCacheメソッド
     * FileCacheが持つDirectoryクラスを更新する
     * ClientがOpenをしたり、他のClientのWriteによってキャッシュがUpdateされる場面
-    * @param directory 置き換える内容
+    * @param root 更新後のディレクトリの根
     * @return 成功したらtrue、失敗したらfalse
     */
-    public Boolean setFileCache(Directory directory) {
-        this.fileCache.setDirectories() = directory;
+    public boolean setFileCache(Directory root) {
+        if (root == null) return false;
+        this.fileCache.setRoot(root);
+        return true;
     }
 }
