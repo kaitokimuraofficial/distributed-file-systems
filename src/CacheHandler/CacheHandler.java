@@ -41,7 +41,7 @@ public class CacheHandler {
 
     // getter method
     public int getOwnedBy() {
-        return ownedBy;
+        return this.ownedBy;
     }
 
     /**
@@ -57,7 +57,7 @@ public class CacheHandler {
     * @return 見つけたいFileのfileContent
     */
     public String getFileContent(String filePath) {
-        File targetFile = search(filePath);
+        File targetFile = this.search(filePath);
         return Arrays.toString(targetFile.getFileContent());
     }
 
@@ -69,7 +69,7 @@ public class CacheHandler {
     * @return 成功したら書き込んだtextの文字数、失敗したら-1
     */
     public int setFileContent(String filePath, String text) {
-        File targetFile = search(filePath);
+        File targetFile = this.search(filePath);
         int len = targetFile.setFileContent(text);
         return len;
     }
