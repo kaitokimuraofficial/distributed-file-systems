@@ -1,12 +1,16 @@
 package src.EntryServer;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.util.Date;
+import java.net.Socket;
+// import java.util.Date;
 
-import java.util.HashMap;
-import java.util.Map;
+// import java.util.HashMap;
+// import java.util.Map;
 
-import src.Client.Client;
+// import src.Client.Client;
+import src.File.File;
 
 /**
 * クライアントと直線通信を行うファイルサーバーのエントリ
@@ -14,40 +18,33 @@ import src.Client.Client;
 */
 
 public class EntryServer {
-    private final int PORT;
-    private final int BACKLOG;
-    private final ServerSocket clientEntry;
+    public static final int PORT = 8080;
+    // private final int BACKLOG;
+    // private final ServerSocket clientEntry;
     
-    private Map<Client, Integer> clientIdMap = new HashMap<>();
+    // private Map<Client, Integer> clientIdMap = new HashMap<>();
     
-    public static class Builder {
-        private static final int PORT = 8080;
-        private static final int BACKLOG = 8081;
-
-        private ServerSocket clientEntry;
-
-        public Builder() {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        ServerSocket s = new ServerSocket(PORT); // ソケットを作成する
+        System.out.println("Started: " + s);
+        try {
+            Socket socket = s.accept(); // コネクション設定要求を待つ
             try {
-                this.clientEntry = new ServerSocket(PORT, BACKLOG);
-            } catch(IOException e) {
-                e.printStackTrace();
-                System.exit(1);
+                System.out.println("Connection accepted: " + socket);
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream()); // データ受信用バッファの設定
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream()); // 送信バッファ設定
+                while (true) {
+                    File receivedFile = (File) in.readObject(); // データの受信
+                    if (receivedFile == null) break;
+                    System.out.println("Echoing : ");
+                    out.writeObject(receivedFile); // データの送信
+                }
+            } finally {
+                System.out.println("closing...");
+                socket.close();
             }
-        }
-
-        public EntryServer build() {
-            return new EntryServer(this);
+        } finally {
+            s.close();
         }
     }
-
-    private EntryServer(Builder builder) {
-        PORT = builder.PORT;
-        BACKLOG = builder.BACKLOG;
-        clientEntry = builder.clientEntry;
-    }
-
-    public void start() {
-        
-    }
-
 }

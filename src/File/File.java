@@ -1,5 +1,6 @@
 package src.File;
 
+import java.io.Serializable;
 import java.lang.Math;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 * @author  kaitokimuraofficial
 */
 
-public class File {
+public class File implements Serializable {
     private final int createdBy;
     private final LocalDateTime creationDate;
     private final int DEFAULTSIZE = 4096;
