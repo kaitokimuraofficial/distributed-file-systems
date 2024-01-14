@@ -52,4 +52,14 @@ public class FileCache {
         this.root.setFile(filePath, updatedFile);
         this.lastUpdatedDate = LocalDateTime.now();
     }
+
+    /**
+    * setRootメソッド
+    * FileCacheが保持するディレクトリthis.rootを更新する
+    * @param root 更新後のディレクトリの根
+    * @return void
+    */
+    public void setRoot(Directory root) {
+        this.root = root;
+    }
 }
