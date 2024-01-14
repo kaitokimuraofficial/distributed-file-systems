@@ -2,6 +2,7 @@ package src.Client;
 
 
 import src.CacheHandler.CacheHandler;
+import src.Mode.Mode;
 
 /**
 * 分散ファイルシステムを使用するクライアント
@@ -18,7 +19,15 @@ public class Client {
     private CacheHandler cacheHandler;
 
     public Client() {
+        this.cacheHandler = new CacheHandler(0);
+    }
 
+    public boolean open(String filePath, Mode fileMode) {
+        return cacheHandler.openFileContent(filePath, fileMode);
+    }
+
+    public boolean close(String filePath) {
+        return cacheHandler.closeFileContent(filePath);
     }
 
     /**
