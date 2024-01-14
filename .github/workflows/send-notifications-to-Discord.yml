@@ -1,0 +1,23 @@
+name: send notifications to Discord
+
+on: pull_request
+
+jobs:
+    Send-notifications:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check out repo's head branch
+              uses: actions/checkout@v2.4.0
+              with:
+                ref: ${{ github.head_ref }} 
+            - name: Get commit message
+              run: echo "Commit_Message=$(git log --pretty=oneline --all --abbrev-commit)" >> $GITHUB_ENV
+            - name: Send notifications of a new pull request
+              uses: appleboy/discord-action@master
+              with:
+                webhook_id: ${{ secrets.WEBHOOK_ID }}
+                webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
+                color: "#48f442"
+                username: "Notification!"
+                message: "New Pull request is created! \n${{ env.Commit_Message }} \n${{ github.event.pull_request.html_url }}"
