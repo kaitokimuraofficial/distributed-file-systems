@@ -1,8 +1,6 @@
 package src.client;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -82,14 +80,30 @@ public class Client {
             cacheHandler = new CacheHandler(clientId);
             System.out.println("あなたのクライアントIDは " + cid + " です.");
 
-            File file = new File(0, "a.txt", true, true);
+            try (BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in))) {
+                while (true) {
+                    System.out.print(">> ");
+                    String message = keyboard.readLine();
+                    if (message.equals("quit")) break;
 
-            for(int i = 0; i < 10; i++) {
-                out.writeObject(file); // データ送信
-                File receivedFile = (File) in.readObject(); // データ受信
-                System.out.println(receivedFile.getFileName());
+                    out.writeObject(message); // データ送信
+                    out.flush();
+
+                    if (message.startsWith("read")) {
+                        Object receivedObject = in.readObject(); // データ受信
+                        System.out.println("receivedObject = " + receivedObject);
+
+                        byte[] bytes = (byte[]) receivedObject;
+                        System.out.println(new String(bytes));
+                    } else if (message.startsWith("write")) {
+                        String sampleMsg = "Haooiehfiwewef";
+                        out.writeObject(sampleMsg.getBytes());
+                        out.flush();
+                        boolean isSuccessful = (boolean) in.readObject();
+                        System.out.println("isSuccessful = " + isSuccessful);
+                    }
+                }
             }
-            out.writeObject(null);
         } finally {
             System.out.println("closing...");
             socket.close();

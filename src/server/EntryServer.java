@@ -5,6 +5,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 // import java.util.Date;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +17,10 @@ import java.util.Map;
 // import src.File.File;
 
 /**
-* クライアントと直線通信を行うファイルサーバーのエントリ
-* @author　Kaito Kimura
-*/
+ * クライアントと直線通信を行うファイルサーバーのエントリ
+ * @author Kaito Kimura
+ * @author Tomoya Aoyagi
+ */
 
 public class EntryServer {
     public static final int PORT = 8080;
@@ -32,9 +35,20 @@ public class EntryServer {
     private static final Map<Integer, ObjectOutputStream> clientStreams = new HashMap<>();
 
     /**
+     * キーをホスト名としたファイルサーバーのリスト
+     * */
+    private static final Map<String, FileServer> fileServers = new HashMap<>();
+
+    private static void initFileServers() {
+        FileServer a = new FileServer(Paths.get(System.getenv("FS_ROOT")));
+        fileServers.put("localhost", a);
+    }
+
+    /**
      * サーバー起動時の処理
      */
     private static void launchServer() {
+        initFileServers();
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("サーバーが起動しました。");
 
@@ -49,6 +63,8 @@ public class EntryServer {
                 // クライアントIDを送信
                 clientOutputStream.writeObject(clientId);
 
+                // clientOutputStream.writeObject(readFile("localhost", Paths.get("hoge.txt"), clientId));
+
                 // クライアントとの通信をハンドルするスレッドを起動
                 new Thread(new ClientHandler(clientSocket, clientId)).start();
             }
@@ -62,11 +78,36 @@ public class EntryServer {
     }
 
     /**
+     * 指定されたファイルサーバーからファイルを読み込む
+     * @param hostname ファイルサーバーのホスト名
+     * @param p 読み込みたいファイルのパス
+     * @param clientId クライアントID
+     * @return 読み込んだファイルの内容
+     */
+    private static byte[] readFile(String hostname, Path p, int clientId) {
+        FileServer fileServer = fileServers.get(hostname);
+        return fileServer != null ? fileServer.readFile(p) : null;
+    }
+
+    /**
+     * 指定されたファイルサーバーにファイルを書き込む
+     * @param hostname ファイルサーバーのホスト名
+     * @param p 書き込みたいファイルのパス
+     * @param clientId クライアントID
+     * @param data 書き込む内容
+     * @return 書き込みに成功すればtrue、失敗すればfalse
+     */
+    private static boolean writeFile(String hostname, Path p, int clientId, byte[] data) {
+        FileServer fileServer = fileServers.get(hostname);
+        return fileServer != null ? fileServer.writeFile(p, data) : false;
+    }
+
+    /**
      * 接続された単一のクライアントについてメッセージの送受信を行うクラス
      * */
     private static class ClientHandler implements Runnable {
-        private Socket clientSocket;
-        private int clientId;
+        private final Socket clientSocket;
+        private final int clientId;
 
         public ClientHandler(Socket clientSocket, int clientId) {
             this.clientSocket = clientSocket;
@@ -83,8 +124,38 @@ public class EntryServer {
                     Object receivedObject = clientInputStream.readObject();
                     System.out.println("クライアント " + clientId + " からオブジェクトを受信: " + receivedObject);
 
+                    if (receivedObject.getClass() == String.class) {
+                        String message = (String) receivedObject;
+                        String[] rpc = message.split(" ");
+                        String hostname;
+                        Path p;
+
+                        switch (rpc[0]) {
+                            case "read":
+                                if (rpc.length < 3) break;
+                                hostname = rpc[1];
+                                p = Paths.get(rpc[2]);
+                                byte[] fileContent = readFile(hostname, p, clientId);
+                                clientStreams.get(clientId).writeObject(fileContent);
+                                clientStreams.get(clientId).flush();
+                                break;
+                            case "write":
+                                if (rpc.length < 3) break;
+                                hostname = rpc[1];
+                                p = Paths.get(rpc[2]);
+                                Object data = clientInputStream.readObject();
+                                boolean res = writeFile(hostname, p, clientId, (byte[]) data);
+                                clientStreams.get(clientId).writeObject(res);
+                                clientStreams.get(clientId).flush();
+                                break;
+                            default:
+                                System.out.println("error");
+                                break;
+                        }
+                    }
+
                     // オブジェクトを他のクライアントにブロードキャスト
-                    broadcastObject(clientId, receivedObject);
+                    // broadcastObject(clientId, receivedObject);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 // クライアントが切断された場合の処理
