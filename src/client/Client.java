@@ -82,6 +82,9 @@ public class Client {
             cacheHandler = new CacheHandler(clientId);
             System.out.println("あなたのクライアントIDは " + cid + " です.");
 
+            String testTxt = new String((byte[]) in.readObject());
+            System.out.println(testTxt);
+
             File file = new File(0, "a.txt", true, true);
 
             for(int i = 0; i < 10; i++) {

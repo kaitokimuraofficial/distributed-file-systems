@@ -1,5 +1,6 @@
 package src.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +36,10 @@ public class FileServer {
     public byte[] readFile(Path filePath) {
         Path p = getAbsolutePath(filePath);
 
+        if (!Files.exists(p)) {
+            return null;
+        }
+
         try {
             return Files.readAllBytes(p);
         } catch (IOException e) {
@@ -51,6 +56,17 @@ public class FileServer {
      */
     public boolean writeFile(Path filePath, byte[] data) {
         Path p = getAbsolutePath(filePath);
+
+        // ファイルが存在しない場合、新規作成する
+        if (!Files.exists(p)) {
+            File f = new File(p.toString());
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
         try {
             Files.write(p, data);

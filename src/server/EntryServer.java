@@ -5,6 +5,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 // import java.util.Date;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +17,10 @@ import java.util.Map;
 // import src.File.File;
 
 /**
-* クライアントと直線通信を行うファイルサーバーのエントリ
-* @author　Kaito Kimura
-*/
+ * クライアントと直線通信を行うファイルサーバーのエントリ
+ * @author Kaito Kimura
+ * @author Tomoya Aoyagi
+ */
 
 public class EntryServer {
     public static final int PORT = 8080;
@@ -32,9 +35,20 @@ public class EntryServer {
     private static final Map<Integer, ObjectOutputStream> clientStreams = new HashMap<>();
 
     /**
+     * キーをホスト名としたファイルサーバーのリスト
+     * */
+    private static final Map<String, FileServer> fileServers = new HashMap<>();
+
+    private static void initFileServers() {
+        FileServer a = new FileServer(Paths.get(System.getenv("FS_ROOT")));
+        fileServers.put("localhost", a);
+    }
+
+    /**
      * サーバー起動時の処理
      */
     private static void launchServer() {
+        initFileServers();
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("サーバーが起動しました。");
 
@@ -49,6 +63,8 @@ public class EntryServer {
                 // クライアントIDを送信
                 clientOutputStream.writeObject(clientId);
 
+                clientOutputStream.writeObject(readFile("localhost", Paths.get("hoge.txt"), clientId));
+
                 // クライアントとの通信をハンドルするスレッドを起動
                 new Thread(new ClientHandler(clientSocket, clientId)).start();
             }
@@ -61,12 +77,17 @@ public class EntryServer {
         launchServer();
     }
 
+    private static byte[] readFile(String hostname, Path p, int clientId) {
+        FileServer fileServer = fileServers.get(hostname);
+        return fileServer != null ? fileServer.readFile(p) : null;
+    }
+
     /**
      * 接続された単一のクライアントについてメッセージの送受信を行うクラス
      * */
     private static class ClientHandler implements Runnable {
-        private Socket clientSocket;
-        private int clientId;
+        private final Socket clientSocket;
+        private final int clientId;
 
         public ClientHandler(Socket clientSocket, int clientId) {
             this.clientSocket = clientSocket;
