@@ -3,66 +3,32 @@ package src.file;
 import java.io.Serializable;
 import java.lang.Math;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 /**
 * ファイル
 * @author  kaitokimuraofficial
+* @author  Keisuke Nakao
 */
 
 public class File implements Serializable {
-    private final int createdBy;
-    private final LocalDateTime creationDate;
     private final int DEFAULTSIZE = 4096;
 
     private String fileName;
     private byte[] fileContent = new byte[DEFAULTSIZE];
     private Boolean isReadAllowed;
     private Boolean isWriteAllowed;
-    private int lastModifiedBy;
-    private LocalDateTime lastModifiedDate;
     private int lastPosition = -1;
-    private int readCount = 0;
-    private int writeCount = 0;
 
-    public File(int createdBy, String fileName, Boolean isReadAllowed, Boolean isWriteAllowed) {
-        this.createdBy = createdBy;
-        this.creationDate = LocalDateTime.now();
+    public File(String fileName, Boolean isReadAllowed, Boolean isWriteAllowed) {
         this.fileName = fileName;
         this.isReadAllowed = isReadAllowed;
         this.isWriteAllowed = isWriteAllowed;
-        this.lastModifiedDate = this.creationDate;
-        this.lastModifiedBy = this.createdBy;
     }
 
     // getter method
-    public int getCreatedBy() {
-        return createdBy;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
-
     public String getFileName() {
         return fileName;
-    }
-    
-    public LocalDateTime getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-    
-    public int getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public int getReadCount() {
-        return readCount;
-    }
-
-    public int getWriteCount() {
-        return writeCount;
     }
 
     public boolean getIsReadAllowed() {
