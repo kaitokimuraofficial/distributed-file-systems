@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-
 
 /**
 * ファイルのキャッシュ
@@ -62,7 +59,7 @@ public class FileCache {
 
         // ファイルが存在しない場合、新規作成する
         if (!Files.exists(p)) {
-            FileContainer f = new FileContainer(p.toString(), new byte[]);
+            FileContainer f = new FileContainer(p.toString(), new byte[0]);
             try {
                 f.createNewFile();
             } catch (IOException e) {
