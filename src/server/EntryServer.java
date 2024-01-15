@@ -63,7 +63,7 @@ public class EntryServer {
                 // クライアントIDを送信
                 clientOutputStream.writeObject(clientId);
 
-                clientOutputStream.writeObject(readFile("localhost", Paths.get("hoge.txt"), clientId));
+                // clientOutputStream.writeObject(readFile("localhost", Paths.get("hoge.txt"), clientId));
 
                 // クライアントとの通信をハンドルするスレッドを起動
                 new Thread(new ClientHandler(clientSocket, clientId)).start();
@@ -103,6 +103,27 @@ public class EntryServer {
                     // クライアントからオブジェクトを受信
                     Object receivedObject = clientInputStream.readObject();
                     System.out.println("クライアント " + clientId + " からオブジェクトを受信: " + receivedObject);
+
+                    if (receivedObject.getClass() == String.class) {
+                        String message = (String) receivedObject;
+                        String[] rpc = message.split(" ");
+
+                        switch (rpc[0]) {
+                            case "read":
+                                String hostname = rpc[1];
+                                Path p = Paths.get(rpc[2]);
+                                byte[] fileContent = readFile(hostname, p, clientId);
+                                clientStreams.get(clientId).writeObject(fileContent);
+                                clientStreams.get(clientId).flush();
+                                break;
+                            case "write":
+                                System.out.println("write");
+                                break;
+                            default:
+                                System.out.println("error");
+                                break;
+                        }
+                    }
 
                     // オブジェクトを他のクライアントにブロードキャスト
                     broadcastObject(clientId, receivedObject);

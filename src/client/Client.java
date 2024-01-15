@@ -1,8 +1,6 @@
 package src.client;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -82,17 +80,23 @@ public class Client {
             cacheHandler = new CacheHandler(clientId);
             System.out.println("あなたのクライアントIDは " + cid + " です.");
 
-            String testTxt = new String((byte[]) in.readObject());
-            System.out.println(testTxt);
+            try (BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in))) {
+                while (true) {
+                    System.out.print(">> ");
+                    String message = keyboard.readLine();
+                    if (message.equals("quit")) break;
+                    out.writeObject(message); // データ送信
+                    out.flush();
+                    Object receivedObject = in.readObject(); // データ受信
+                    System.out.println("receivedObject = " + receivedObject);
 
-            File file = new File(0, "a.txt", true, true);
-
-            for(int i = 0; i < 10; i++) {
-                out.writeObject(file); // データ送信
-                File receivedFile = (File) in.readObject(); // データ受信
-                System.out.println(receivedFile.getFileName());
+                    // 以下デバッグ用？
+                    byte[] bytes = (byte[]) receivedObject;
+                    if (message.startsWith("read")) {
+                        System.out.println(new String(bytes));
+                    }
+                }
             }
-            out.writeObject(null);
         } finally {
             System.out.println("closing...");
             socket.close();
