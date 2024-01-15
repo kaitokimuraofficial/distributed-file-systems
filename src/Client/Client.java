@@ -23,11 +23,10 @@ import src.File.File;
 *
 */
 public class Client {
-    private CacheHandler cacheHandler;
+    private static CacheHandler cacheHandler;
+    private static int clientId;
 
-    public Client() {
-        this.cacheHandler = new CacheHandler(0);
-    }
+    private Client() {}
 
     public boolean open(String filePath, Mode fileMode) {
         return cacheHandler.openFileContent(filePath, fileMode);
@@ -77,6 +76,12 @@ public class Client {
 
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream()); // 送信バッファ設定
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream()); // データ受信用バッファの設定
+
+            // クライアントIDを受信
+            int cid = (int) in.readObject();
+            clientId = cid;
+            cacheHandler = new CacheHandler(clientId);
+            System.out.println("あなたのクライアントIDは " + cid + " です.");
 
             File file = new File(0, "a.txt", true, true);
 
