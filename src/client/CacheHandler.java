@@ -1,4 +1,4 @@
-package src.CacheHandler;
+package src.client;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -6,10 +6,9 @@ import java.util.Map;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import src.Directory.Directory;
-import src.File.File;
-import src.FileCache.FileCache;
-import src.Mode.Mode;
+import src.file.Directory;
+import src.file.File;
+import src.util.Mode;
 
 
 /**

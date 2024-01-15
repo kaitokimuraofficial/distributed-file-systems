@@ -1,10 +1,10 @@
-package src.FileCache;
+package src.client;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import src.Directory.Directory;
-import src.File.File;
+import src.file.Directory;
+import src.file.File;
 
 /**
 * ファイルのキャッシュ

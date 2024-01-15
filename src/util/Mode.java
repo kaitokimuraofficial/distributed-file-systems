@@ -1,4 +1,4 @@
-package src.Mode;
+package src.util;
 
 /**
  * ファイルの読み書きモードを表す列挙型

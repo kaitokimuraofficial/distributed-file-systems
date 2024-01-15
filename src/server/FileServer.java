@@ -1,4 +1,4 @@
-package src.FileServer;
+package src.server;
 
 /** 
 * ファイルサーバー

@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import src.File.File;
-import src.FileCache.FileCache;
+import src.client.FileCache;
+import src.file.File;
 
 /**
 * FileCacheクラスの単体テスト
