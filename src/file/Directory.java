@@ -127,7 +127,7 @@ public class Directory {
         else {
             for (File file : this.files) {
                 if (name.equals(file.getFileName())) {
-                    file.setFileContent(new String(updatedFile.getFileContent()));
+                    file.setFileContent(updatedFile.getFileContent());
                     return;
                 }
             }

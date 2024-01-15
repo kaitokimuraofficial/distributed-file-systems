@@ -2,7 +2,6 @@ package src.file;
 
 import java.io.Serializable;
 import java.lang.Math;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -59,8 +58,8 @@ public class File implements Serializable {
         }
 
         // startからendまでの部分配列を取得
-        byte[] asciiBytes = Arrays.copyOfRange(fileContent, 0, lastPosition);
-        return asciiBytes;
+        byte[] data = Arrays.copyOfRange(fileContent, 0, lastPosition);
+        return data;
     }
 
     // setter method
@@ -86,21 +85,19 @@ public class File implements Serializable {
     * @param text 書き込む内容
     * @return 書き込んだStringの長さか、失敗したら-1
     */
-    public int setFileContent(String text) {
+    public int setFileContent(byte[] data) {
         if (isWriteAllowed == false) {
             return -1;
         }
 
-        byte[] asciiBytes = text.getBytes(StandardCharsets.US_ASCII);
-
-        for (int i = 0; i < asciiBytes.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             if (i < DEFAULTSIZE) {
-                fileContent[i] = asciiBytes[i];
+                fileContent[i] = data[i];
             } else {
                 break;
             }
         }
-        setLastPosition(Math.min(asciiBytes.length, DEFAULTSIZE));
-        return text.length();
+        setLastPosition(Math.min(data.length, DEFAULTSIZE));
+        return this.lastPosition;
     }
 }

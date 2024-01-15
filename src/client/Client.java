@@ -10,15 +10,10 @@ import src.util.Mode;
 
 /**
 * 分散ファイルシステムを使用するクライアント
-* @author　Kaito Kimura
+* @author Kaito Kimura
+* @author Keisuke Nakao
 */
 
-/**
-* EntryServerやFileServerが存在しない仮定でのClientクラスの基本形
-* 内部でCacheHandlerをもち、このcacheHandlerに対してread()、write()を行う
-*
-*
-*/
 public class Client {
     private static CacheHandler cacheHandler;
     private static int clientId;

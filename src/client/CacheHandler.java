@@ -103,7 +103,7 @@ public class CacheHandler {
     public int setFileContent(String filePath, String text) {
         File targetFile = openedFiles.get(filePath);
         if (targetFile == null) return -1;
-        int len = targetFile.setFileContent(text);
+        int len = targetFile.setFileContent(text.getBytes());
         if (len != -1) this.fileCache.setFile(filePath, targetFile);
         return len;
     }
