@@ -1,1 +1,5 @@
-## Hello, World
+## makedoc
+javadocが起動して、ドキュメントが生成できる
+
+## run
+第一引数の.javaをコンパイルした後、エラーがなければ実行する
