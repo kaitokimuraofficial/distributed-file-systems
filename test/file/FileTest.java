@@ -1,10 +1,10 @@
 package test.file;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import src.file.File;
 
@@ -13,90 +13,96 @@ import src.file.File;
 * @author　Kaito Kimura
 */
 
+@RunWith(Enclosed.class)
 public class FileTest {
-    private File file1;
 
-    @Before
-    public void setup() {
-        file1 = new File("test", true, true);
-    }
+    public static class FileのfileContentが空のとき {
+        File file;
+        @Before
+        public void setup() {
+            file = new File("test", true, true);
+        }
 
-    @Test
-    public void testGetFileName() {
-        assertEquals("test", file1.getFileName());
-    }
-    
-    @Test
-    public void testGetIsReadAllowed() {
-        assertEquals(true, file1.getIsReadAllowed());
-    }
-    
-    @Test
-    public void testGetIsWriteAllowed() {
-        assertEquals(true, file1.getIsWriteAllowed());
-    }
+        @Test
+        public void getFileContentがnullを返す() {
+            assertEquals(file.getFileContent(), null);
+        }
 
-    @Test
-    public void testSetFileContent() {
-        byte[] text = "test".getBytes();
-        file1.setFileContent(text);
-        assertEquals(4, file1.setFileContent("test".getBytes()));
-    }
+        @Test
+        public void DEFAULTSIZE未満の長さのバイト列をsetFileContentで書き込める() {
+            int expectedLastPosition = 100;
+            String stringData = "a".repeat(expectedLastPosition);
+            byte[] expectedFileContent = stringData.getBytes();
+            System.out.println(expectedFileContent.length);
+            assertEquals(file.setFileContent(expectedFileContent), 100);
+            assertEquals(new String(file.getFileContent()), stringData);
+        }
 
-    @Test
-    public void testGetLastPosition() {
-        byte[] text = "test".getBytes();
-        file1.setFileContent(text);
-        assertEquals(4, file1.getLastPosition());
-    }
+        @Test
+        public void DEFAULTSIZEの長さのバイト列をsetFileContentで書き込める() {
+            int expectedLastPosition = 4096;
+            String stringData = "a".repeat(expectedLastPosition);
+            byte[] expectedFileContent = stringData.getBytes();
+            assertEquals(file.setFileContent(expectedFileContent), 4096);
+            assertEquals(new String(file.getFileContent()), stringData);
+        }
 
-    @Test
-    public void testGetFileContentWhenLengthIsWithinLimit() {
-        byte[] text = "test".getBytes();
-        file1.setFileContent(text);
-        assertArrayEquals(text, file1.getFileContent());
-    }
-
-    @Test
-    public void testGetFileContentWhenLengthIsZero() {
-        byte[] text = "".getBytes();
-        file1.setFileContent(text);
-        assertArrayEquals(text, file1.getFileContent());
+        @Test
+        public void DEFAULTSIZEより大きい長さのバイト列をsetFileContentで書き込むと4096までしか書き込めない() {
+            int expectedLastPosition = 4100;
+            String stringData = "a".repeat(expectedLastPosition);
+            byte[] expectedFileContent = "a".repeat(4096).getBytes();
+            assertEquals(file.setFileContent(stringData.getBytes()), 4096);
+            assertEquals(new String(file.getFileContent()), new String(expectedFileContent));
+        }
     }
 
-    @Test
-    public void testGetFileContentWhenLengthIsOverDEFAULTSIZE() {
-        byte[] text = "test".repeat(4096).getBytes();
-        file1.setFileContent(text);
-        byte[] textExpected = "test".repeat(1024).getBytes();
-        assertArrayEquals(textExpected, file1.getFileContent());
+    public static class FileのfileContentが空でないとき {
+        File file;
+        @Before
+        public void setup() {
+            String stringData = "a".repeat(100);
+            byte[] expectedFileContent = stringData.getBytes();
+            file = new File("test", true, true);
+            file.setFileContent(expectedFileContent);
+        }
+
+        @Test
+        public void setFileContentで書き換える() {
+            int expectedLastPosition = 200;
+            String stringData = "a".repeat(expectedLastPosition);
+            byte[] expectedFileContent = stringData.getBytes();
+            System.out.println(expectedFileContent.length);
+            assertEquals(file.setFileContent(expectedFileContent), 200);
+            assertEquals(new String(file.getFileContent()), stringData);
+        }
     }
 
-    @Test
-    public void testGetFileContentWithSomeSetContent() {
-        byte[] text1 = "test".getBytes();
-        byte[] text2 = "I am using Java.".getBytes();
-        file1.setFileContent(text1);
-        file1.setFileContent(text2);
-        assertArrayEquals(text2, file1.getFileContent());
-        assertEquals(16, file1.getLastPosition());
+    public static class FileのisReadAllowedがfalseのとき {
+        File file;
+        @Before
+        public void setup() {
+            file = new File("test", false, true);
+        }
+
+        @Test
+        public void getFileContentをするとnullが返される() {
+            assertEquals(file.getFileContent(), null);
+        }
     }
 
-    @Test
-    public void testSetFileName() {
-        file1.setFileName("test");
-        assertEquals("test", file1.getFileName());
-    }
+    public static class FileのisWriteAllowedがfalseのとき {
+        File file;
+        @Before
+        public void setup() {
+            file = new File("test", true, false);
+        }
 
-    @Test
-    public void testSetIsReadAllowed() {
-        file1.setIsReadAllowed(false);
-        assertEquals(false, file1.getIsReadAllowed());
-    }
-
-    @Test
-    public void testSetIsWriteAllowed() {
-        file1.setIsWriteAllowed(false);
-        assertEquals(false, file1.getIsWriteAllowed());
+        @Test
+        public void setFileContentをするとnullが返される() {
+            String stringData = "a".repeat(100);
+            byte[] byteData = stringData.getBytes();
+            assertEquals(file.setFileContent(byteData), -1);
+        }
     }
 }
