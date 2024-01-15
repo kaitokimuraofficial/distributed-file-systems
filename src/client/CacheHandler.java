@@ -59,7 +59,7 @@ public class CacheHandler {
         // ファイルが存在せず、かつ書き込み可能な権限でファイルを開いている場合は新規作成する
         if (targetFile == null && fileMode.canWrite()) {
             Path p = Paths.get(filePath);
-            fileCache.setFile(filePath, new File(this.ownedBy, p.getFileName().toString(), true, true));
+            fileCache.setFile(filePath, new File(p.getFileName().toString(), true, true));
         }
         
         // 権限があるか確認

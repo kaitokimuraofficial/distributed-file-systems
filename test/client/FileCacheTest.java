@@ -47,7 +47,7 @@ public class FileCacheTest {
     @Test
     public void testSetFile() {
         String filePath = "/a/b/test.txt";
-        File file = new File(1, "test.txt", true, true);
+        File file = new File("test.txt", true, true);
 
         File obtainedFile = fileCache.getFile(filePath);
         assertEquals(null, obtainedFile);

@@ -19,12 +19,7 @@ public class FileTest {
 
     @Before
     public void setup() {
-        file1 = new File(1, "test", true, true);
-    }
-
-    @Test
-    public void testGetCreatedBy() {
-        assertEquals(1, file1.getCreatedBy());
+        file1 = new File("test", true, true);
     }
 
     @Test
@@ -40,11 +35,6 @@ public class FileTest {
     @Test
     public void testGetIsWriteAllowed() {
         assertEquals(true, file1.getIsWriteAllowed());
-    }
-
-    @Test
-    public void testGetLastModifiedBy() {
-        assertEquals(1, file1.getLastModifiedBy());
     }
 
     @Test
