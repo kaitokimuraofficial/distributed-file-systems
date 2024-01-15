@@ -77,9 +77,29 @@ public class EntryServer {
         launchServer();
     }
 
+    /**
+     * 指定されたファイルサーバーからファイルを読み込む
+     * @param hostname ファイルサーバーのホスト名
+     * @param p 読み込みたいファイルのパス
+     * @param clientId クライアントID
+     * @return 読み込んだファイルの内容
+     */
     private static byte[] readFile(String hostname, Path p, int clientId) {
         FileServer fileServer = fileServers.get(hostname);
         return fileServer != null ? fileServer.readFile(p) : null;
+    }
+
+    /**
+     * 指定されたファイルサーバーにファイルを書き込む
+     * @param hostname ファイルサーバーのホスト名
+     * @param p 書き込みたいファイルのパス
+     * @param clientId クライアントID
+     * @param data 書き込む内容
+     * @return 書き込みに成功すればtrue、失敗すればfalse
+     */
+    private static boolean writeFile(String hostname, Path p, int clientId, byte[] data) {
+        FileServer fileServer = fileServers.get(hostname);
+        return fileServer != null ? fileServer.writeFile(p, data) : false;
     }
 
     /**
@@ -107,17 +127,26 @@ public class EntryServer {
                     if (receivedObject.getClass() == String.class) {
                         String message = (String) receivedObject;
                         String[] rpc = message.split(" ");
+                        String hostname;
+                        Path p;
 
                         switch (rpc[0]) {
                             case "read":
-                                String hostname = rpc[1];
-                                Path p = Paths.get(rpc[2]);
+                                if (rpc.length < 3) break;
+                                hostname = rpc[1];
+                                p = Paths.get(rpc[2]);
                                 byte[] fileContent = readFile(hostname, p, clientId);
                                 clientStreams.get(clientId).writeObject(fileContent);
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "write":
-                                System.out.println("write");
+                                if (rpc.length < 3) break;
+                                hostname = rpc[1];
+                                p = Paths.get(rpc[2]);
+                                Object data = clientInputStream.readObject();
+                                boolean res = writeFile(hostname, p, clientId, (byte[]) data);
+                                clientStreams.get(clientId).writeObject(res);
+                                clientStreams.get(clientId).flush();
                                 break;
                             default:
                                 System.out.println("error");
@@ -126,7 +155,7 @@ public class EntryServer {
                     }
 
                     // オブジェクトを他のクライアントにブロードキャスト
-                    broadcastObject(clientId, receivedObject);
+                    // broadcastObject(clientId, receivedObject);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 // クライアントが切断された場合の処理

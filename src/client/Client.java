@@ -85,15 +85,22 @@ public class Client {
                     System.out.print(">> ");
                     String message = keyboard.readLine();
                     if (message.equals("quit")) break;
+
                     out.writeObject(message); // データ送信
                     out.flush();
-                    Object receivedObject = in.readObject(); // データ受信
-                    System.out.println("receivedObject = " + receivedObject);
 
-                    // 以下デバッグ用？
-                    byte[] bytes = (byte[]) receivedObject;
                     if (message.startsWith("read")) {
+                        Object receivedObject = in.readObject(); // データ受信
+                        System.out.println("receivedObject = " + receivedObject);
+
+                        byte[] bytes = (byte[]) receivedObject;
                         System.out.println(new String(bytes));
+                    } else if (message.startsWith("write")) {
+                        String sampleMsg = "Haooiehfiwewef";
+                        out.writeObject(sampleMsg.getBytes());
+                        out.flush();
+                        boolean isSuccessful = (boolean) in.readObject();
+                        System.out.println("isSuccessful = " + isSuccessful);
                     }
                 }
             }
