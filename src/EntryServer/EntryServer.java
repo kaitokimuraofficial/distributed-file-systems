@@ -12,7 +12,7 @@ import java.util.Map;
 // import java.util.Map;
 
 // import src.Client.Client;
-import src.File.File;
+// import src.File.File;
 
 /**
 * クライアントと直線通信を行うファイルサーバーのエントリ
@@ -57,7 +57,7 @@ public class EntryServer {
         }
     }
     
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) {
         launchServer();
     }
 
