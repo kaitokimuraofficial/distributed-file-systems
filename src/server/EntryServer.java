@@ -1,4 +1,6 @@
 package src.server;
+import src.file.File;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -82,9 +84,9 @@ public class EntryServer {
      * @param hostname ファイルサーバーのホスト名
      * @param p 読み込みたいファイルのパス
      * @param clientId クライアントID
-     * @return 読み込んだファイルの内容
+     * @return 読み込んだファイル
      */
-    private static byte[] readFile(String hostname, Path p, int clientId) {
+    private static File readFile(String hostname, Path p, int clientId) {
         FileServer fileServer = fileServers.get(hostname);
         return fileServer != null ? fileServer.readFile(p) : null;
     }
@@ -94,12 +96,12 @@ public class EntryServer {
      * @param hostname ファイルサーバーのホスト名
      * @param p 書き込みたいファイルのパス
      * @param clientId クライアントID
-     * @param data 書き込む内容
+     * @param superFile 書き込むファイル
      * @return 書き込みに成功すればtrue、失敗すればfalse
      */
-    private static boolean writeFile(String hostname, Path p, int clientId, byte[] data) {
+    private static boolean writeFile(String hostname, Path p, int clientId, File superFile) {
         FileServer fileServer = fileServers.get(hostname);
-        return fileServer != null ? fileServer.writeFile(p, data) : false;
+        return fileServer != null ? fileServer.writeFile(p, superFile) : false;
     }
 
     /**
@@ -124,6 +126,7 @@ public class EntryServer {
                     Object receivedObject = clientInputStream.readObject();
                     System.out.println("クライアント " + clientId + " からオブジェクトを受信: " + receivedObject);
 
+                    // 受け取ったオブジェクトが文字列型の場合
                     if (receivedObject.getClass() == String.class) {
                         String message = (String) receivedObject;
                         String[] rpc = message.split(" ");
@@ -135,8 +138,8 @@ public class EntryServer {
                                 if (rpc.length < 3) break;
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
-                                byte[] fileContent = readFile(hostname, p, clientId);
-                                clientStreams.get(clientId).writeObject(fileContent);
+                                File file = readFile(hostname, p, clientId);
+                                clientStreams.get(clientId).writeObject(file);
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "write":
@@ -144,7 +147,7 @@ public class EntryServer {
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 Object data = clientInputStream.readObject();
-                                boolean res = writeFile(hostname, p, clientId, (byte[]) data);
+                                boolean res = writeFile(hostname, p, clientId, (File) data);
                                 clientStreams.get(clientId).writeObject(res);
                                 clientStreams.get(clientId).flush();
                                 break;
