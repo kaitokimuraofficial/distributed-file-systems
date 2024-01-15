@@ -44,9 +44,9 @@ public class File implements Serializable {
     
     /**
     * getFileContentメソッド
-    * ファイルの内容を表すbyte配列を返す
+    * ファイルの内容を表すバイト列を返す
     * @param 
-    * @return fileContentのbyte列
+    * @return fileContentのバイト列
     */
     public byte[] getFileContent() {
         if (isReadAllowed == false) {
@@ -57,7 +57,7 @@ public class File implements Serializable {
             return null;
         }
 
-        // startからendまでの部分配列を取得
+        // 0からlastPositionまでの部分配列を取得
         byte[] data = Arrays.copyOfRange(fileContent, 0, lastPosition);
         return data;
     }
@@ -82,8 +82,8 @@ public class File implements Serializable {
     /**
     * setFileContentメソッド
     * ファイルの内容を書き換える
-    * @param text 書き込む内容
-    * @return 書き込んだStringの長さか、失敗したら-1
+    * @param data 書き込むバイト列
+    * @return 書き込んだバイト列の長さか、失敗したら-1
     */
     public int setFileContent(byte[] data) {
         if (isWriteAllowed == false) {
