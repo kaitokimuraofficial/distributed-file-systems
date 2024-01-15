@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
 
-import src.File.File;
+import src.file.File;
 
 /**
 * Fileクラスの単体テスト

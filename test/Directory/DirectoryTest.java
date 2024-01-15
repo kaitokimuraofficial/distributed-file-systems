@@ -7,8 +7,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import src.Directory.Directory;
-import src.File.File;
+import src.file.Directory;
+import src.file.File;
 
 /**
 * Directoryクラスの単体テスト

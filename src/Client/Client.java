@@ -1,4 +1,4 @@
-package src.Client;
+package src.client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,10 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import src.CacheHandler.CacheHandler;
-import src.EntryServer.EntryServer;
-import src.Mode.Mode;
-import src.File.File;
+import src.file.File;
+import src.server.EntryServer;
+import src.util.Mode;
 
 /**
 * 分散ファイルシステムを使用するクライアント

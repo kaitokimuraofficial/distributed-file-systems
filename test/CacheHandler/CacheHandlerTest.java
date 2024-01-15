@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import src.CacheHandler.CacheHandler;
-import src.File.File;
+import src.client.CacheHandler;
+import src.file.File;
 
 public class CacheHandlerTest {
 
