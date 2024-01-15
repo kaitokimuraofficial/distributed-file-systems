@@ -98,6 +98,6 @@ public class File implements Serializable {
             }
         }
         setLastPosition(Math.min(data.length, DEFAULTSIZE));
-        return data.length;
+        return this.lastPosition;
     }
 }
