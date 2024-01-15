@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "fmt:pre-commit": "prettier --write src/**/*.java"
+  },
+  "lint-staged": {
+    "src/**/*.{java}": [
+      "yarn run fmt:pre-commit"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier-plugin-java": "^2.5.0"
+  }
+}

@@ -2,10 +2,11 @@ package test.file;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import src.file.Directory;
 import src.file.File;
@@ -15,9 +16,36 @@ import src.file.File;
 * @author  kei-0917
 */
 
+@RunWith(Enclosed.class)
 public class DirectoryTest {
-    /*
-    Example Tree Structure: 
+    public static class Directoryの中身が空のとき {
+        File file;
+        Directory root, a;
+        @Before
+        public void setUp() {
+            root = new Directory("root", new ArrayList<Directory>(), new ArrayList<File>());
+        }
+
+        @Test
+        public void getFileをするとnullが返される() {
+            File file1 = root.getFile("test.txt");
+            assertEquals(file1, null);
+        }
+
+        @Test
+        public void 存在しないファイルをsetFileをすると新規にファイルが作成される() {
+            String filePath = "/a/b/test.txt";
+            file = new File("test.txt", true, true);
+
+            assertEquals(null, root.getFile(filePath));
+            root.setFile(filePath, file);
+            assertEquals("test.txt", root.getFile(filePath).getFileName());
+        }
+    }
+
+    public static class Directoryの中身が空でないとき {
+        /*
+        Example Tree Structure: 
                    root
                   /    \
                  a      d
@@ -25,29 +53,30 @@ public class DirectoryTest {
               b     c
               |
           test.txt
-    */
+        */
+        
+        File file;
+        Directory root, a, b, c, d;
+        @Before
+        public void setUp() {
+            file = new File("test.txt", true, true);
+            b = new Directory("b", new ArrayList<Directory>(), new ArrayList<File>(List.of(file)));
+            c = new Directory("c", new ArrayList<Directory>(), new ArrayList<File>());
+            a = new Directory("a", new ArrayList<Directory>(List.of(b, c)), new ArrayList<File>());
+            d = new Directory("d", new ArrayList<Directory>(), new ArrayList<File>());
+            root = new Directory("root", new ArrayList<Directory>(List.of(a, d)), new ArrayList<File>());
+        }
 
-    File file;
-    Directory root, a, b, c, d;
+        @Test
+        public void getFileが指定されたパスにあるファイルを返す() {
+            File file1 = root.getFile("/a/b/test.txt");
+            assertEquals("test.txt", file1.getFileName());
+        }
 
-    @Before
-    public void setUp() {
-        file = new File("test.txt", true, true);
-        b = new Directory("b", null, new ArrayList<File>(List.of(file)));
-        c = new Directory("c", null, null);
-        a = new Directory("a", new ArrayList<Directory>(List.of(b, c)), null);
-        d = new Directory("d", null, null);
-        root = new Directory("root", new ArrayList<Directory>(List.of(a, d)), null);
+        @Test
+        public void 指定されたパスが無効なときにgetFileはnullを返す() {    
+            File file1 = root.getFile("/a/b/temp.txt");
+            assertEquals(null, file1);
+        }
     }
-
-    @Test
-    public void testGetFile() {
-        File file1 = root.getFile("/a/b/test.txt");
-        assertEquals("test.txt", file1.getFileName());
-
-        File file2 = root.getFile("/a/b/temp.txt");
-        assertEquals(null, file2);
-    }
-
-    // setFile メソッドのテストは, FileCache クラスのテストで書いたので略.
 }

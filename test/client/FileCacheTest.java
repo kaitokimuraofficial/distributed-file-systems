@@ -1,11 +1,11 @@
 package test.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import src.client.FileCache;
 import src.file.File;
+import src.client.FileCache;
 
 /**
 * FileCacheクラスの単体テスト
@@ -38,22 +38,21 @@ public class FileCacheTest {
     */
 
     FileCache fileCache;
+    String filePath;
+    File file;
 
     @Before
     public void setUp() {
         fileCache = new FileCache();
+        filePath = "/a/b/test.txt";
+        file = new File("test.txt", true, true);
     }
 
     @Test
-    public void testSetFile() {
-        String filePath = "/a/b/test.txt";
-        File file = new File("test.txt", true, true);
-
+    public void 存在しないファイルをsetFileをすると新規にファイルが作成される() {            
         File obtainedFile = fileCache.getFile(filePath);
         assertEquals(null, obtainedFile);
-        
         fileCache.setFile(filePath, file);
-
         obtainedFile = fileCache.getFile(filePath);
         assertEquals("test.txt", obtainedFile.getFileName());
     }

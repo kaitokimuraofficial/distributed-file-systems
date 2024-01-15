@@ -12,6 +12,7 @@ import java.nio.file.Path;
  */
 
 public class FileServer {
+
     /** このパスをルートとしてファイルサーバーを立てる */
     private final Path root;
 
@@ -76,5 +77,4 @@ public class FileServer {
             return false;
         }
     }
-
 }

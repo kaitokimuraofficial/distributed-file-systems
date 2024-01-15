@@ -3,11 +3,12 @@ package src.file;
 import java.io.File;
 
 /**
-* ファイル
-* @author Keisuke Nakao
-*/
+ * ファイル
+ * @author Keisuke Nakao
+ */
 
 public class FileContainer extends File {
+
     private byte[] fileContent;
 
     public FileContainer(String pathName, byte[] fileContent) {

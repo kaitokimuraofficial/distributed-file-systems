@@ -1,12 +1,13 @@
 package test.client;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import src.client.CacheHandler;
-import src.file.File;
+
 
 public class CacheHandlerTest {
 
@@ -16,23 +17,4 @@ public class CacheHandlerTest {
 
     }
 
-    @Test
-    public void testGetFileContent() {
-
-    }
-
-    @Test
-    public void testGetOwnedBy() {
-
-    }
-
-    @Test
-    public void testSetFileCache() {
-
-    }
-
-    @Test
-    public void testSetFileContent() {
-
-    }
 }

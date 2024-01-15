@@ -1,4 +1,5 @@
 package src.server;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,16 +24,18 @@ import java.util.Map;
  */
 
 public class EntryServer {
+
     public static final int PORT = 8080;
     // private final int BACKLOG;
     // private final ServerSocket clientEntry;
-    
+
     // private Map<Client, Integer> clientIdMap = new HashMap<>();
 
     /** 次のクライアントに対して割り当てるID */
     private static int clientIdCounter = 0;
     /** 接続されているクライアントのStreamを保持 */
-    private static final Map<Integer, ObjectOutputStream> clientStreams = new HashMap<>();
+    private static final Map<Integer, ObjectOutputStream> clientStreams =
+        new HashMap<>();
 
     /**
      * キーをホスト名としたファイルサーバーのリスト
@@ -57,7 +60,9 @@ public class EntryServer {
                 System.out.println("新しいクライアントが接続しました.");
 
                 int clientId = clientIdCounter++;
-                ObjectOutputStream clientOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+                ObjectOutputStream clientOutputStream = new ObjectOutputStream(
+                    clientSocket.getOutputStream()
+                );
                 clientStreams.put(clientId, clientOutputStream);
 
                 // クライアントIDを送信
@@ -72,7 +77,7 @@ public class EntryServer {
             e.printStackTrace();
         }
     }
-    
+
     public static void main(String[] args) {
         launchServer();
     }
@@ -97,7 +102,12 @@ public class EntryServer {
      * @param data 書き込む内容
      * @return 書き込みに成功すればtrue、失敗すればfalse
      */
-    private static boolean writeFile(String hostname, Path p, int clientId, byte[] data) {
+    private static boolean writeFile(
+        String hostname,
+        Path p,
+        int clientId,
+        byte[] data
+    ) {
         FileServer fileServer = fileServers.get(hostname);
         return fileServer != null ? fileServer.writeFile(p, data) : false;
     }
@@ -106,6 +116,7 @@ public class EntryServer {
      * 接続された単一のクライアントについてメッセージの送受信を行うクラス
      * */
     private static class ClientHandler implements Runnable {
+
         private final Socket clientSocket;
         private final int clientId;
 
@@ -117,12 +128,19 @@ public class EntryServer {
         @Override
         public void run() {
             try {
-                ObjectInputStream clientInputStream = new ObjectInputStream(clientSocket.getInputStream());
+                ObjectInputStream clientInputStream = new ObjectInputStream(
+                    clientSocket.getInputStream()
+                );
 
                 while (true) {
                     // クライアントからオブジェクトを受信
                     Object receivedObject = clientInputStream.readObject();
-                    System.out.println("クライアント " + clientId + " からオブジェクトを受信: " + receivedObject);
+                    System.out.println(
+                        "クライアント " +
+                        clientId +
+                        " からオブジェクトを受信: " +
+                        receivedObject
+                    );
 
                     if (receivedObject.getClass() == String.class) {
                         String message = (String) receivedObject;
@@ -135,8 +153,14 @@ public class EntryServer {
                                 if (rpc.length < 3) break;
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
-                                byte[] fileContent = readFile(hostname, p, clientId);
-                                clientStreams.get(clientId).writeObject(fileContent);
+                                byte[] fileContent = readFile(
+                                    hostname,
+                                    p,
+                                    clientId
+                                );
+                                clientStreams
+                                    .get(clientId)
+                                    .writeObject(fileContent);
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "write":
@@ -144,7 +168,12 @@ public class EntryServer {
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 Object data = clientInputStream.readObject();
-                                boolean res = writeFile(hostname, p, clientId, (byte[]) data);
+                                boolean res = writeFile(
+                                    hostname,
+                                    p,
+                                    clientId,
+                                    (byte[]) data
+                                );
                                 clientStreams.get(clientId).writeObject(res);
                                 clientStreams.get(clientId).flush();
                                 break;
@@ -153,13 +182,14 @@ public class EntryServer {
                                 break;
                         }
                     }
-
                     // オブジェクトを他のクライアントにブロードキャスト
                     // broadcastObject(clientId, receivedObject);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 // クライアントが切断された場合の処理
-                System.out.println("クライアント " + clientId + " が切断されました.");
+                System.out.println(
+                    "クライアント " + clientId + " が切断されました."
+                );
                 clientStreams.remove(clientId);
             }
         }
@@ -170,11 +200,15 @@ public class EntryServer {
          * @param object 送信するObject
          */
         private void broadcastObject(int senderClientId, Object object) {
-            for (Map.Entry<Integer, ObjectOutputStream> entry : clientStreams.entrySet()) {
+            for (Map.Entry<
+                Integer,
+                ObjectOutputStream
+            > entry : clientStreams.entrySet()) {
                 int receiverClientId = entry.getKey();
                 if (receiverClientId != senderClientId) {
                     try {
-                        ObjectOutputStream receiverOutputStream = entry.getValue();
+                        ObjectOutputStream receiverOutputStream =
+                            entry.getValue();
                         receiverOutputStream.writeObject(object);
                         receiverOutputStream.flush();
                     } catch (IOException e) {
