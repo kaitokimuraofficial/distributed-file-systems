@@ -32,7 +32,7 @@ public class DirectoryTest {
 
     @Before
     public void setUp() {
-        file = new File(1, "test.txt", true, true);
+        file = new File("test.txt", true, true);
         b = new Directory("b", null, new ArrayList<File>(List.of(file)));
         c = new Directory("c", null, null);
         a = new Directory("a", new ArrayList<Directory>(List.of(b, c)), null);
