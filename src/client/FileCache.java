@@ -1,10 +1,13 @@
 package src.client;
 
+import src.file.FileContainer;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import src.file.Directory;
-import src.file.File;
 
 /**
 * ファイルのキャッシュ
@@ -13,53 +16,68 @@ import src.file.File;
 */
 
 public class FileCache {
-    private Directory root;
-    private LocalDateTime lastUpdatedDate;
+    private final Path root;
 
-    public FileCache() {
-        this.root = new Directory("root", new ArrayList<Directory>(), new ArrayList<File>());
-        this.lastUpdatedDate = LocalDateTime.now();
-    }
-
-    /**
-    * getLastUpdatedDateメソッド
-    * キャッシュが最後に変更された日時を返す
-    * @return Date
-    */
-    public LocalDateTime getLastUpdatedDate() {
-        return this.lastUpdatedDate;
-    }
-
-    /**
-    * getFileメソッド
-    * 指定したファイルを取得する
-    * @param filePath 見つけたいFileのパス
-    * @return File
-    */
-    public File getFile(String filePath) {
-        return this.root.getFile(filePath);
-    }
-
-    /**
-    * setFileメソッド
-    * 指定したファイルを更新する
-    * ファイルが存在しない場合、新たに作成する
-    * @param filePath 見つけたいFileのパス
-    * @param updatedFile 変更後のファイル
-    * @return void
-    */
-    public void setFile(String filePath, File updatedFile) {
-        this.root.setFile(filePath, updatedFile);
-        this.lastUpdatedDate = LocalDateTime.now();
-    }
-
-    /**
-    * setRootメソッド
-    * FileCacheが保持するディレクトリthis.rootを更新する
-    * @param root 更新後のディレクトリの根
-    * @return void
-    */
-    public void setRoot(Directory root) {
+    public FileCache(Path root) {
         this.root = root;
     }
+
+    /**
+     * 与えられたパスから、実際のファイルサーバー上のパスを取得する
+     * @param filePath 取得したいファイルのパス
+     * @return キャッシュ上のファイルのパス
+     */
+    private Path getAbsolutePath(Path filePath) {
+        return this.root.resolve(filePath).toAbsolutePath();
+    }
+
+    /**
+     * 与えられたパスのファイルの内容を読み込み、バイト列として返す
+     * @param filePath 読み込みたいファイルのパス
+     * @return ファイルの内容
+     */
+    public byte[] readFile(Path filePath) {
+        Path p = getAbsolutePath(filePath);
+
+        if (!Files.exists(p)) {
+            return null;
+        }
+
+        try {
+            return Files.readAllBytes(p);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 与えられたパスのファイルに、バイト列を書き込む
+     * @param filePath 書き込みたいファイルのパス
+     * @param data 書き込む内容
+     * @return 書き込みに成功したかどうか
+     */
+    public boolean writeFile(Path filePath, byte[] data) {
+        Path p = getAbsolutePath(filePath);
+
+        // ファイルが存在しない場合、新規作成する
+        if (!Files.exists(p)) {
+            FileContainer f = new FileContainer(p.toString(), new byte[]);
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        try {
+            Files.write(p, data);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 }

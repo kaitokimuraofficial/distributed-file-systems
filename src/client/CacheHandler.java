@@ -46,40 +46,40 @@ public class CacheHandler {
     * File.fileContentに対するRead, Writeのみだと仮定
     */
 
-   /**
+    /**
     * openFileContentメソッド
     * 指定されたパスのFileを開き、readできる状態にする
     * @param filePath openしたいFileのパス
     */
-   public boolean openFileContent(String filePath, Mode fileMode) {
-      if (openedFiles.containsKey(filePath)) return true;
+    public boolean openFileContent(String filePath, Mode fileMode) {
+        if (openedFiles.containsKey(filePath)) return true;
+        
+        File targetFile = this.search(filePath);
+        
+        // ファイルが存在せず、かつ書き込み可能な権限でファイルを開いている場合は新規作成する
+        if (targetFile == null && fileMode.canWrite()) {
+            Path p = Paths.get(filePath);
+            fileCache.setFile(filePath, new File(this.ownedBy, p.getFileName().toString(), true, true));
+        }
+        
+        // 権限があるか確認
+        openedFiles.put(filePath, targetFile);
+        
+        return openedFiles.containsKey(filePath);
+    }
 
-      File targetFile = this.search(filePath);
-
-      // ファイルが存在せず、かつ書き込み可能な権限でファイルを開いている場合は新規作成する
-      if (targetFile == null && fileMode.canWrite()) {
-         Path p = Paths.get(filePath);
-         fileCache.setFile(filePath, new File(this.ownedBy, p.getFileName().toString(), true, true));
-      }
-
-      // 権限があるか確認
-      openedFiles.put(filePath, targetFile);
-
-      return openedFiles.containsKey(filePath);
-   }
-
-   /**
+    /**
     * closeFileContentメソッド
     * 指定されたパスのFileをopenedMapsから削除する
     * @param filePath closeしたいFileのパス
     */
-   public boolean closeFileContent(String filePath) {
-      if (!openedFiles.containsKey(filePath)) return true;
-
-      openedFiles.remove(filePath);
-
-      return !openedFiles.containsKey(filePath);
-   }
+    public boolean closeFileContent(String filePath) {
+        if (!openedFiles.containsKey(filePath)) return true;
+        
+        openedFiles.remove(filePath);
+        
+        return !openedFiles.containsKey(filePath);
+    }
 
     /**
     * getFileContentメソッド

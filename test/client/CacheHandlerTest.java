@@ -1,4 +1,4 @@
-package test.CacheHandler;
+package test.client;
 
 import static org.junit.Assert.assertEquals;
 
