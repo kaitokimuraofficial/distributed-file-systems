@@ -1,4 +1,4 @@
-package test.FileCache;
+package test.client;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
