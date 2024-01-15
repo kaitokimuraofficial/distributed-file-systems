@@ -1,8 +1,15 @@
 package src.Client;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
 
 import src.CacheHandler.CacheHandler;
+import src.EntryServer.EntryServer;
 import src.Mode.Mode;
+import src.File.File;
 
 /**
 * 分散ファイルシステムを使用するクライアント
@@ -16,11 +23,10 @@ import src.Mode.Mode;
 *
 */
 public class Client {
-    private CacheHandler cacheHandler;
+    private static CacheHandler cacheHandler;
+    private static int clientId;
 
-    public Client() {
-        this.cacheHandler = new CacheHandler(0);
-    }
+    private Client() {}
 
     public boolean open(String filePath, Mode fileMode) {
         return cacheHandler.openFileContent(filePath, fileMode);
@@ -59,5 +65,35 @@ public class Client {
             return;
         }
         System.out.println("Success!");
+    }
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        InetAddress addr = InetAddress.getByName("localhost"); // IP アドレスへの変換
+        System.out.println("addr = " + addr);
+        Socket socket = new Socket(addr, EntryServer.PORT); // ソケットの生成
+        try {
+            System.out.println("socket = " + socket);
+
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream()); // 送信バッファ設定
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream()); // データ受信用バッファの設定
+
+            // クライアントIDを受信
+            int cid = (int) in.readObject();
+            clientId = cid;
+            cacheHandler = new CacheHandler(clientId);
+            System.out.println("あなたのクライアントIDは " + cid + " です.");
+
+            File file = new File(0, "a.txt", true, true);
+
+            for(int i = 0; i < 10; i++) {
+                out.writeObject(file); // データ送信
+                File receivedFile = (File) in.readObject(); // データ受信
+                System.out.println(receivedFile.getFileName());
+            }
+            out.writeObject(null);
+        } finally {
+            System.out.println("closing...");
+            socket.close();
+        }
     }
 }
