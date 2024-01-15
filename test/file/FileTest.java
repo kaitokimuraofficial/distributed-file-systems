@@ -2,7 +2,6 @@ package test.file;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,54 +38,54 @@ public class FileTest {
 
     @Test
     public void testSetFileContent() {
-        String text = "FUCK";
+        byte[] text = "test".getBytes();
         file1.setFileContent(text);
-        assertEquals(4, file1.setFileContent("FUCK"));
+        assertEquals(4, file1.setFileContent("test".getBytes()));
     }
 
     @Test
     public void testGetLastPosition() {
-        String text = "FUCK";
+        byte[] text = "test".getBytes();
         file1.setFileContent(text);
         assertEquals(4, file1.getLastPosition());
     }
 
     @Test
     public void testGetFileContentWhenLengthIsWithinLimit() {
-        String text = "FUCK";
+        byte[] text = "test".getBytes();
         file1.setFileContent(text);
-        assertArrayEquals(text.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
+        assertArrayEquals(text, file1.getFileContent());
     }
 
     @Test
     public void testGetFileContentWhenLengthIsZero() {
-        String text = "";
+        byte[] text = "".getBytes();
         file1.setFileContent(text);
-        assertArrayEquals(text.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
+        assertArrayEquals(text, file1.getFileContent());
     }
 
     @Test
     public void testGetFileContentWhenLengthIsOverDEFAULTSIZE() {
-        String text = "FUCK".repeat(4096);
+        byte[] text = "test".repeat(4096).getBytes();
         file1.setFileContent(text);
-        String textExpected = "FUCK".repeat(1024);
-        assertArrayEquals(textExpected.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
+        byte[] textExpected = "test".repeat(1024).getBytes();
+        assertArrayEquals(textExpected, file1.getFileContent());
     }
 
     @Test
     public void testGetFileContentWithSomeSetContent() {
-        String text1 = "FUCK";
-        String text2 = "I am using Java.";
+        byte[] text1 = "test".getBytes();
+        byte[] text2 = "I am using Java.".getBytes();
         file1.setFileContent(text1);
         file1.setFileContent(text2);
-        assertArrayEquals(text2.getBytes(StandardCharsets.US_ASCII), file1.getFileContent());
+        assertArrayEquals(text2, file1.getFileContent());
         assertEquals(16, file1.getLastPosition());
     }
 
     @Test
     public void testSetFileName() {
-        file1.setFileName("FUCK");
-        assertEquals("FUCK", file1.getFileName());
+        file1.setFileName("test");
+        assertEquals("test", file1.getFileName());
     }
 
     @Test
