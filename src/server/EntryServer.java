@@ -1,5 +1,7 @@
 package src.server;
 import src.file.File;
+import src.server.exception.EntryServerException;
+import src.util.Mode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -35,6 +37,10 @@ public class EntryServer {
     private static int clientIdCounter = 0;
     /** 接続されているクライアントのStreamを保持 */
     private static final Map<Integer, ObjectOutputStream> clientStreams = new HashMap<>();
+    /**
+     * ファイルサーバー上の各ファイルについて、各ユーザーの権限を管理する
+     */
+    private static final Map<String, FileUserGroup> fileUserGroups = new HashMap<>();
 
     /**
      * キーをホスト名としたファイルサーバーのリスト
@@ -42,7 +48,13 @@ public class EntryServer {
     private static final Map<String, FileServer> fileServers = new HashMap<>();
 
     private static void initFileServers() {
-        FileServer a = new FileServer(Paths.get(System.getenv("FS_ROOT")));
+        String fsRoot = System.getenv("FS_ROOT");
+        if (fsRoot == null) {
+            System.out.println("FS_ROOT is not set");
+            System.exit(1);
+        }
+
+        FileServer a = new FileServer(Paths.get(fsRoot));
         fileServers.put("localhost", a);
     }
 
@@ -79,6 +91,57 @@ public class EntryServer {
         launchServer();
     }
 
+    private static String joinFilePath(String hostname, Path p) {
+        return hostname + ":" + p.toString();
+    }
+
+    /**
+     * ファイルの権限グループにユーザーを追加する
+     * @param hostname ファイルサーバーのホスト名
+     * @param p 開きたいファイルのパス
+     * @param clientId クライアントID
+     * @param mode ファイルモード
+     * @throws EntryServerException ファイルが他のユーザーによって使用中のため、開くことができない場合
+     */
+    private static void openFile(String hostname, Path p, int clientId, Mode mode) throws EntryServerException {
+        String path = joinFilePath(hostname, p);
+        FileUserGroup group = fileUserGroups.get(path);
+        if (group == null) {
+            group = new FileUserGroup();
+        }
+
+        if (mode.canWrite()) {
+            if (group.canWrite()) {
+                group.addUser(clientId, mode.canRead(), mode.canWrite());
+                fileUserGroups.put(path, group);
+            } else {
+                throw new EntryServerException("ファイルが他のユーザーによって使用中のため、書き込みできません。");
+            }
+        }
+        else {
+            if (!group.hasWriteUser()) {
+                group.addUser(clientId, true, false);
+                fileUserGroups.put(path, group);
+            } else {
+                throw new EntryServerException("ファイルが他のユーザーによって使用中のため、開くことができません。");
+            }
+        }
+    }
+
+    /**
+     * ファイルの権限グループからユーザーを削除する
+     * @param hostname ファイルサーバーのホスト名
+     * @param p 開きたいファイルのパス
+     * @param clientId クライアントID
+     */
+    private static void closeFile(String hostname, Path p, int clientId) {
+        String path = joinFilePath(hostname, p);
+        FileUserGroup group = fileUserGroups.get(path);
+        if (group != null) {
+            group.removeUser(clientId);
+        }
+    }
+
     /**
      * 指定されたファイルサーバーからファイルを読み込む
      * @param hostname ファイルサーバーのホスト名
@@ -86,9 +149,16 @@ public class EntryServer {
      * @param clientId クライアントID
      * @return 読み込んだファイル
      */
-    private static File readFile(String hostname, Path p, int clientId) {
-        FileServer fileServer = fileServers.get(hostname);
-        return fileServer != null ? fileServer.readFile(p) : null;
+    private static File readFile(String hostname, Path p, int clientId) throws EntryServerException {
+        String path = joinFilePath(hostname, p);
+        FileUserGroup group = fileUserGroups.get(path);
+
+        if (group != null && group.allowRead(clientId)) {
+            FileServer fileServer = fileServers.get(hostname);
+            return fileServer != null ? fileServer.readFile(p) : null;
+        } else {
+            throw new EntryServerException("指定されたファイルを開く権限がありません。");
+        }
     }
 
     /**
@@ -99,9 +169,16 @@ public class EntryServer {
      * @param superFile 書き込むファイル
      * @return 書き込みに成功すればtrue、失敗すればfalse
      */
-    private static boolean writeFile(String hostname, Path p, int clientId, File superFile) {
-        FileServer fileServer = fileServers.get(hostname);
-        return fileServer != null ? fileServer.writeFile(p, superFile) : false;
+    private static boolean writeFile(String hostname, Path p, int clientId, File superFile) throws EntryServerException {
+        String path = joinFilePath(hostname, p);
+        FileUserGroup group = fileUserGroups.get(path);
+
+        if (group != null && group.allowWrite(clientId)) {
+            FileServer fileServer = fileServers.get(hostname);
+            return fileServer != null ? fileServer.writeFile(p, superFile) : false;
+        } else {
+            throw new EntryServerException("指定されたファイルに書き込む権限がありません。");
+        }
     }
 
     /**
@@ -135,30 +212,60 @@ public class EntryServer {
 
                         switch (rpc[0]) {
                             case "read":
+                                // read [hostname] [path]
                                 if (rpc.length < 3) break;
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
-                                File file = readFile(hostname, p, clientId);
-                                clientStreams.get(clientId).writeObject(file);
+                                try {
+                                    File file = readFile(hostname, p, clientId);
+                                    clientStreams.get(clientId).writeObject(file);
+                                } catch (EntryServerException e) {
+                                    clientStreams.get(clientId).writeObject(e);
+                                }
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "write":
+                                // write [hostname] [path]
+                                // [data]
                                 if (rpc.length < 3) break;
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 Object data = clientInputStream.readObject();
-                                boolean res = writeFile(hostname, p, clientId, (File) data);
-                                clientStreams.get(clientId).writeObject(res);
+                                try {
+                                    boolean res = writeFile(hostname, p, clientId, (File) data);
+                                    clientStreams.get(clientId).writeObject(res);
+                                } catch (EntryServerException e) {
+                                    clientStreams.get(clientId).writeObject(e);
+                                }
                                 clientStreams.get(clientId).flush();
                                 break;
+                            case "open":
+                                // open [hostname] [path] [mode]
+                                if (rpc.length < 4) break;
+                                hostname = rpc[1];
+                                p = Paths.get(rpc[2]);
+                                Mode mode = Mode.parseMode(rpc[3]);
+                                if (mode == null) break;
+                                try {
+                                    openFile(hostname, p, clientId, mode);
+                                    clientStreams.get(clientId).writeObject(true);
+                                } catch (EntryServerException e) {
+                                    clientStreams.get(clientId).writeObject(e);
+                                }
+                                clientStreams.get(clientId).flush();
+                                break;
+                            case "close":
+                                // close [hostname] [path]
+                                if (rpc.length < 3) break;
+                                hostname = rpc[1];
+                                p = Paths.get(rpc[2]);
+                                closeFile(hostname, p, clientId);
+                                break;
                             default:
-                                System.out.println("error");
+                                System.out.println("command not found");
                                 break;
                         }
                     }
-
-                    // オブジェクトを他のクライアントにブロードキャスト
-                    // broadcastObject(clientId, receivedObject);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 // クライアントが切断された場合の処理
