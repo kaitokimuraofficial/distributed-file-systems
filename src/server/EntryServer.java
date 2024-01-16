@@ -288,6 +288,12 @@ public class EntryServer {
                 // クライアントが切断された場合の処理
                 System.out.println("クライアント " + clientId + " が切断されました.");
                 clientStreams.remove(clientId);
+
+                // closeされていないファイルをcloseする
+                for (Map.Entry<String, FileUserGroup> entry : fileUserGroups.entrySet()) {
+                    FileUserGroup group = entry.getValue();
+                    group.removeUser(clientId);
+                }
             }
         }
 
