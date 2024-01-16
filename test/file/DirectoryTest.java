@@ -42,10 +42,10 @@ public class DirectoryTest {
 
     @Test
     public void testGetFile() {
-        File file1 = root.getFile("/a/b/test.txt");
+        File file1 = root.getFile("a/b/test.txt");
         assertEquals("test.txt", file1.getFileName());
 
-        File file2 = root.getFile("/a/b/temp.txt");
+        File file2 = root.getFile("a/b/temp.txt");
         assertEquals(null, file2);
     }
 
