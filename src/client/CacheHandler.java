@@ -88,7 +88,7 @@ public class CacheHandler {
     */
     public String getFileContent(String filePath) {
         File targetFile = this.getFile(filePath);
-        return Arrays.toString(targetFile.getFileContent());
+        return new String(targetFile.getFileContent());
     }
 
     /**
