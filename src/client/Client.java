@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import src.file.File;
 import src.server.EntryServer;
+import src.server.exception.EntryServerException;
 import src.util.Mode;
 
 /**
@@ -81,21 +82,46 @@ public class Client {
                     String message = keyboard.readLine();
                     if (message.equals("quit")) break;
 
-                    out.writeObject(message); // データ送信
+                    out.writeObject(message); // 入力文字列を送信
                     out.flush();
 
                     if (message.startsWith("read")) {
                         Object receivedObject = in.readObject(); // データ受信
                         System.out.println("receivedObject = " + receivedObject);
 
-                        byte[] bytes = (byte[]) receivedObject;
-                        System.out.println(new String(bytes));
+                        if (receivedObject.getClass() == File.class) {
+                            File receivedFile = (File) receivedObject;
+                            System.out.println(new String(receivedFile.getFileContent()));
+                        } else {
+                            EntryServerException e = (EntryServerException) receivedObject;
+                            System.out.println(e.getMessage());
+                        }
                     } else if (message.startsWith("write")) {
+                        // サンプルデータを更新用として送信
+                        File sampleFile = new File("sample.txt", true, true);
                         String sampleMsg = "Haooiehfiwewef";
-                        out.writeObject(sampleMsg.getBytes());
+                        sampleFile.setFileContent(sampleMsg.getBytes());
+                        out.writeObject(sampleFile);
                         out.flush();
-                        boolean isSuccessful = (boolean) in.readObject();
-                        System.out.println("isSuccessful = " + isSuccessful);
+
+                        Object receivedObject = in.readObject();
+                        if (receivedObject.getClass() == Boolean.class) {
+                            boolean isSuccessful = (boolean) receivedObject;
+                            System.out.println("isSuccessful = " + isSuccessful);
+                        } else {
+                            EntryServerException e = (EntryServerException) receivedObject;
+                            System.out.println(e.getMessage());
+                        }
+                    } else if (message.startsWith("open")) {
+                        Object receivedObject = in.readObject(); // データ受信
+
+                        if (receivedObject.getClass() == Boolean.class) {
+                            boolean isSuccessful = (boolean) receivedObject;
+                            System.out.println("isSuccessful = " + isSuccessful);
+                        } else {
+                            EntryServerException e = (EntryServerException) receivedObject;
+                            System.out.println(e.getMessage());
+                        }
                     }
                 }
             }
