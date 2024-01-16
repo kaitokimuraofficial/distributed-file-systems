@@ -15,7 +15,7 @@ public enum Mode {
     private final boolean canWrite;
     private final String abbrev;
 
-    private Mode(boolean canRead, boolean canWrite, String abbrev) {
+    Mode(boolean canRead, boolean canWrite, String abbrev) {
         this.canRead = canRead;
         this.canWrite = canWrite;
         this.abbrev = abbrev;

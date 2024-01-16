@@ -193,11 +193,19 @@ public class EntryServer {
             this.clientId = clientId;
         }
 
+        /**
+         * 引数の数が合っていないときの例外処理
+         * @throws IOException
+         */
+        private void throwArgumentMismatchError() throws IOException {
+            EntryServerException e = new EntryServerException("引数の数が不正です。");
+            clientStreams.get(clientId).writeObject(e);
+            clientStreams.get(clientId).flush();
+        }
+
         @Override
         public void run() {
-            try {
-                ObjectInputStream clientInputStream = new ObjectInputStream(clientSocket.getInputStream());
-
+            try (ObjectInputStream clientInputStream = new ObjectInputStream(clientSocket.getInputStream())) {
                 while (true) {
                     // クライアントからオブジェクトを受信
                     Object receivedObject = clientInputStream.readObject();
@@ -213,7 +221,10 @@ public class EntryServer {
                         switch (rpc[0]) {
                             case "read":
                                 // read [hostname] [path]
-                                if (rpc.length < 3) break;
+                                if (rpc.length < 3) {
+                                    throwArgumentMismatchError();
+                                    break;
+                                }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 try {
@@ -227,7 +238,10 @@ public class EntryServer {
                             case "write":
                                 // write [hostname] [path]
                                 // [data]
-                                if (rpc.length < 3) break;
+                                if (rpc.length < 3) {
+                                    throwArgumentMismatchError();
+                                    break;
+                                }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 Object data = clientInputStream.readObject();
@@ -241,7 +255,10 @@ public class EntryServer {
                                 break;
                             case "open":
                                 // open [hostname] [path] [mode]
-                                if (rpc.length < 4) break;
+                                if (rpc.length < 4) {
+                                    throwArgumentMismatchError();
+                                    break;
+                                }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 Mode mode = Mode.parseMode(rpc[3]);
