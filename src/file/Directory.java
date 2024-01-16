@@ -40,7 +40,7 @@ public class Directory {
     */
     private ArrayDeque<String> convertStringToArrayList(String filePath) {
         String[] filePathArray = filePath.split("/");
-        ArrayDeque<String> filePathArrayList = new ArrayDeque<String>(Arrays.asList(filePathArray).subList(1, filePathArray.length));
+        ArrayDeque<String> filePathArrayList = new ArrayDeque<String>(Arrays.asList(filePathArray).subList(0, filePathArray.length));
         return filePathArrayList;
     }
 
