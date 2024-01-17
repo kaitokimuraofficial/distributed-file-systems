@@ -142,15 +142,17 @@ public class Client {
                             System.out.println("指定されたファイルに書き込む権限がありません。");
                         }
                     } else if (opetarion.equals("close")) {
-                        System.out.println(cacheHandler.getOpenedFileMode(filePath).canWrite());
-
                         // write
                         if (cacheHandler.getOpenedFileMode(filePath).canWrite()) {
                             out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
                             out.flush();
 
-                            File file = cacheHandler.getFile(filePath);
-                            out.writeObject(file);
+                            File cacheFile = cacheHandler.getFile(filePath);
+
+                            File sendFile = new File(cacheFile.getFileName(), cacheFile.getIsReadAllowed(), cacheFile.getIsWriteAllowed());
+                            sendFile.setFileContent(cacheFile.getFileContent());
+
+                            out.writeObject(sendFile);
                             out.flush();
 
                             Object receivedObject = in.readObject();
