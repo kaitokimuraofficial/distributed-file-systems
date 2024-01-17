@@ -21,12 +21,12 @@ public class Client {
 
     private Client() {}
 
-    public boolean open(String filePath, Mode fileMode) {
-        return cacheHandler.openFileContent(filePath, fileMode);
+    public boolean open(String filePath, File serverFile, Mode fileMode) {
+        return cacheHandler.openFile(filePath, serverFile, fileMode);
     }
 
     public boolean close(String filePath) {
-        return cacheHandler.closeFileContent(filePath);
+        return cacheHandler.closeFile(filePath);
     }
 
     /**
@@ -80,48 +80,95 @@ public class Client {
                 while (true) {
                     System.out.print(">> ");
                     String message = keyboard.readLine();
-                    if (message.equals("quit")) break;
 
-                    out.writeObject(message); // 入力文字列を送信
-                    out.flush();
+                    String[] messageParts = message.split(" ");
+                    String opetarion = messageParts[0];
+                    if (opetarion.equals("quit")) break;
+                    String hostname = messageParts[1];
+                    String filePath = messageParts[2];
+                    String mode = "rw";
+                    if (messageParts.length == 4) mode = messageParts[3];
 
-                    if (message.startsWith("read")) {
-                        Object receivedObject = in.readObject(); // データ受信
-                        System.out.println("receivedObject = " + receivedObject);
 
-                        if (receivedObject.getClass() == File.class) {
-                            File receivedFile = (File) receivedObject;
-                            System.out.println(new String(receivedFile.getFileContent()));
-                        } else {
-                            EntryServerException e = (EntryServerException) receivedObject;
-                            System.out.println(e.getMessage());
-                        }
-                    } else if (message.startsWith("write")) {
-                        // サンプルデータを更新用として送信
-                        File sampleFile = new File("sample.txt", true, true);
-                        String sampleMsg = "Haooiehfiwewef";
-                        sampleFile.setFileContent(sampleMsg.getBytes());
-                        out.writeObject(sampleFile);
+                    if (opetarion.equals("open")) {
+                        // open
+                        out.writeObject(message); // 入力文字列を送信
                         out.flush();
 
-                        Object receivedObject = in.readObject();
-                        if (receivedObject.getClass() == Boolean.class) {
-                            boolean isSuccessful = (boolean) receivedObject;
-                            System.out.println("isSuccessful = " + isSuccessful);
-                        } else {
-                            EntryServerException e = (EntryServerException) receivedObject;
-                            System.out.println(e.getMessage());
-                        }
-                    } else if (message.startsWith("open")) {
                         Object receivedObject = in.readObject(); // データ受信
-
+                        boolean isSuccessful = false;
                         if (receivedObject.getClass() == Boolean.class) {
-                            boolean isSuccessful = (boolean) receivedObject;
+                            isSuccessful = (boolean) receivedObject;
                             System.out.println("isSuccessful = " + isSuccessful);
                         } else {
                             EntryServerException e = (EntryServerException) receivedObject;
                             System.out.println(e.getMessage());
                         }
+                        if (!isSuccessful) continue;
+                        
+                        // read
+                        File receivedFile = null;
+
+                        if (!mode.equals("w")) {
+                            out.writeObject("read" + " " + hostname + " " + filePath); // 入力文字列を送信
+                            out.flush();
+
+                            receivedObject = in.readObject(); // データ受信
+                            System.out.println("receivedObject = " + receivedObject);
+
+                            if (receivedObject == null) {
+                                receivedFile = null;
+                            } else if (receivedObject.getClass() == File.class) {
+                                receivedFile = (File) receivedObject;
+                                System.out.println(new String(receivedFile.getFileContent()));
+                            } else {
+                                EntryServerException e = (EntryServerException) receivedObject;
+                                System.out.println(e.getMessage());
+                            }
+                        }
+                        cacheHandler.openFile(filePath, receivedFile, Mode.parseMode(mode));
+                    } else if (opetarion.equals("read")) {
+                        if (cacheHandler.isOperationAllowed(filePath, opetarion)) {
+                            String content = cacheHandler.getFileContent(filePath);
+                            System.out.println(content);
+                        } else {
+                            System.out.println("指定されたファイルを読み込む権限がありません。");
+                        }
+                    } else if (opetarion.equals("write")) {
+                        if (cacheHandler.isOperationAllowed(filePath, opetarion)) {
+                            String content = keyboard.readLine();
+                            cacheHandler.setFileContent(filePath, content);
+                        } else {
+                            System.out.println("指定されたファイルに書き込む権限がありません。");
+                        }
+                    } else if (opetarion.equals("close")) {
+                        System.out.println(cacheHandler.getOpenedFileMode(filePath).canWrite());
+
+                        // write
+                        if (cacheHandler.getOpenedFileMode(filePath).canWrite()) {
+                            out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
+                            out.flush();
+
+                            File file = cacheHandler.getFile(filePath);
+                            out.writeObject(file);
+                            out.flush();
+
+                            Object receivedObject = in.readObject();
+                            boolean isSuccessful = false;
+                            if (receivedObject.getClass() == Boolean.class) {
+                                isSuccessful = (boolean) receivedObject;
+                                System.out.println("isSuccessful = " + isSuccessful);
+                            } else {
+                                EntryServerException e = (EntryServerException) receivedObject;
+                                System.out.println(e.getMessage());
+                            }
+                        }
+
+                        // close
+                        cacheHandler.closeFile(filePath);
+
+                        out.writeObject(message);
+                        out.flush();
                     }
                 }
             }

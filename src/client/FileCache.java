@@ -8,8 +8,8 @@ import src.file.File;
 
 /**
 * ファイルのキャッシュ
-* @author  kaitokimuraofficial
-* @author　kei-0917
+* @author kaitokimuraofficial
+* @author Keisuke Nakao
 */
 
 public class FileCache {
@@ -51,6 +51,10 @@ public class FileCache {
     public void setFile(String filePath, File updatedFile) {
         this.root.setFile(filePath, updatedFile);
         this.lastUpdatedDate = LocalDateTime.now();
+    }
+
+    public void disableCache(String filePath) {
+        this.root.disableCache(filePath);
     }
 
     /**

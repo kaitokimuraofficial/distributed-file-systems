@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 /**
 * ファイル
-* @author  kaitokimuraofficial
-* @author  Keisuke Nakao
+* @author kaitokimuraofficial
+* @author Keisuke Nakao
 */
 
 public class File implements Serializable {
@@ -15,14 +15,16 @@ public class File implements Serializable {
 
     private String fileName;
     private byte[] fileContent = new byte[DEFAULTSIZE];
-    private Boolean isReadAllowed;
-    private Boolean isWriteAllowed;
+    private boolean isReadAllowed;
+    private boolean isWriteAllowed;
+    private boolean isCacheValid;
     private int lastPosition = -1;
 
-    public File(String fileName, Boolean isReadAllowed, Boolean isWriteAllowed) {
+    public File(String fileName, boolean isReadAllowed, boolean isWriteAllowed) {
         this.fileName = fileName;
         this.isReadAllowed = isReadAllowed;
         this.isWriteAllowed = isWriteAllowed;
+        this.isCacheValid = true;
     }
 
     // getter method
@@ -36,6 +38,10 @@ public class File implements Serializable {
 
     public boolean getIsWriteAllowed() {
         return isWriteAllowed;
+    }
+
+    public boolean getIsCacheValid() {
+        return isCacheValid;
     }
 
     public int getLastPosition() {
@@ -67,12 +73,16 @@ public class File implements Serializable {
         this.fileName = fileName;
     }
     
-    public void setIsReadAllowed(Boolean isReadAllowed) {
+    public void setIsReadAllowed(boolean isReadAllowed) {
         this.isReadAllowed = isReadAllowed;
     }
 
-    public void setIsWriteAllowed(Boolean isWriteAllowed) {
+    public void setIsWriteAllowed(boolean isWriteAllowed) {
         this.isWriteAllowed = isWriteAllowed;
+    }
+
+    public void setIsCacheValid(boolean isCacheValid) {
+        this.isCacheValid = isCacheValid;
     }
 
     private void setLastPosition(int lastPosition) {

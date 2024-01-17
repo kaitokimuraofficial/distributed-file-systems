@@ -5,10 +5,9 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 
 import org.junit.Before;
-import org.junit.experimental.runners.Enclosed;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-
 import src.file.File;
 
 /**
@@ -21,7 +20,9 @@ import src.file.File;
 public class FileTest {
 
     public static class FileのfileContentが空のとき {
+
         File file;
+
         @Before
         public void setup() {
             file = new File("test", true, true);
@@ -57,12 +58,17 @@ public class FileTest {
             String stringData = "a".repeat(expectedLastPosition);
             byte[] expectedFileContent = "a".repeat(4096).getBytes();
             assertEquals(file.setFileContent(stringData.getBytes()), 4096);
-            assertEquals(new String(file.getFileContent()), new String(expectedFileContent));
+            assertEquals(
+                new String(file.getFileContent()),
+                new String(expectedFileContent)
+            );
         }
     }
 
     public static class FileのfileContentが空でないとき {
+
         File file;
+
         @Before
         public void setup() {
             String stringData = "a".repeat(100);
@@ -83,7 +89,9 @@ public class FileTest {
     }
 
     public static class FileのisReadAllowedがfalseのとき {
+
         File file;
+
         @Before
         public void setup() {
             file = new File("test", false, true);
@@ -96,7 +104,9 @@ public class FileTest {
     }
 
     public static class FileのisWriteAllowedがfalseのとき {
+
         File file;
+
         @Before
         public void setup() {
             file = new File("test", true, false);

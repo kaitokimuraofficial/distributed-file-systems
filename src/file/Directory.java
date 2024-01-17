@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 /**
 * ディレクトリ
-* @author  kei-0917
-* @author  kaitokimuraofficial
+* @author Keisuke Nakao
+* @author kaitokimuraofficial
 */
 
 public class Directory {
@@ -66,6 +66,10 @@ public class Directory {
         setFile(this.convertStringToArrayList(filePath), updatedFile);
     }
 
+    public void disableCache(String filePath) {
+        disableCache(this.convertStringToArrayList(filePath));
+    }
+
     /**
     * getFileメソッド
     * filePathをArrayDeque<String>型に変更したもの
@@ -115,7 +119,7 @@ public class Directory {
                 if (name.equals(directory.getDirName())) {
                     foundDirectory = true;
                     directory.setFile(filePath, updatedFile);
-                    break;
+                    return;
                 }
             }
             if (!foundDirectory) {
@@ -132,6 +136,28 @@ public class Directory {
                 }
             }
             this.files.add(updatedFile);
+        }
+    }
+
+    private void disableCache(ArrayDeque<String> filePath) {
+        if (filePath.isEmpty()) return;
+        final String name = filePath.poll();
+
+        if (filePath.size() > 0) {
+            for (Directory directory : this.directories) {
+                if (name.equals(directory.getDirName())) {
+                    directory.disableCache(filePath);
+                    return;
+                }
+            }
+        }
+        else {
+            for (File file : this.files) {
+                if (name.equals(file.getFileName())) {
+                    file.setIsCacheValid(false);
+                    return;
+                }
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 package src.client;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.nio.file.Path;
@@ -13,13 +12,14 @@ import src.util.Mode;
 
 /**
 * ファイルのキャッシュを操作・管理するクラス
-* @author  kaitokimuraofficial
+* @author kaitokimuraofficial
+* @author Keisuke Nakao
 */
 
 public class CacheHandler {
     private final FileCache fileCache;
     private final int ownedBy;
-    private final Map<String, File> openedFiles = new HashMap<>();
+    private final Map<String, Mode> openedFiles = new HashMap<>();
 
     public CacheHandler(int ownedBy) {
         this.fileCache = new FileCache();
@@ -27,12 +27,12 @@ public class CacheHandler {
     }
 
     /**
-    * searchメソッド
+    * getFileメソッド
     * FileCacheのDirectoryクラスからfilePathのFileを見つけて返す
     * @param filePath 見つけたいFileのパス
     * @return 見つけたいFile
     */
-    private File search(String filePath) {
+    public File getFile(String filePath) {
         return this.fileCache.getFile(filePath);
     }
 
@@ -42,29 +42,26 @@ public class CacheHandler {
     }
 
     /**
-    * Clientクラスからの命令は
-    * File.fileContentに対するRead, Writeのみだと仮定
-    */
-
-    /**
     * openFileContentメソッド
     * 指定されたパスのFileを開き、readできる状態にする
     * @param filePath openしたいFileのパス
     */
-    public boolean openFileContent(String filePath, Mode fileMode) {
+    public boolean openFile(String filePath, File serverFile, Mode fileMode) {
         if (openedFiles.containsKey(filePath)) return true;
-        
-        File targetFile = this.search(filePath);
-        
-        // ファイルが存在せず、かつ書き込み可能な権限でファイルを開いている場合は新規作成する
-        if (targetFile == null && fileMode.canWrite()) {
-            Path p = Paths.get(filePath);
-            fileCache.setFile(filePath, new File(p.getFileName().toString(), true, true));
+        File targetFile = this.getFile(filePath);
+
+        if (targetFile == null || !targetFile.getIsCacheValid()) {
+            File file;
+            if (serverFile == null) {
+                Path p = Paths.get(filePath);
+                file = new File(p.getFileName().toString(), true, true);
+            } else {
+                file = serverFile;
+            }
+            fileCache.setFile(filePath, file);
         }
         
-        // 権限があるか確認
-        openedFiles.put(filePath, targetFile);
-        
+        openedFiles.put(filePath, fileMode);
         return openedFiles.containsKey(filePath);
     }
 
@@ -73,11 +70,9 @@ public class CacheHandler {
     * 指定されたパスのFileをopenedMapsから削除する
     * @param filePath closeしたいFileのパス
     */
-    public boolean closeFileContent(String filePath) {
+    public boolean closeFile(String filePath) {
         if (!openedFiles.containsKey(filePath)) return true;
-        
         openedFiles.remove(filePath);
-        
         return !openedFiles.containsKey(filePath);
     }
 
@@ -89,8 +84,8 @@ public class CacheHandler {
     * @return 見つけたいFileのfileContent
     */
     public String getFileContent(String filePath) {
-        File targetFile = openedFiles.get(filePath);
-        return Arrays.toString(targetFile.getFileContent());
+        File targetFile = this.getFile(filePath);
+        return new String(targetFile.getFileContent());
     }
 
     /**
@@ -101,11 +96,29 @@ public class CacheHandler {
     * @return 成功したら書き込んだtextの文字数、失敗したら-1
     */
     public int setFileContent(String filePath, String text) {
-        File targetFile = openedFiles.get(filePath);
+        File targetFile = this.getFile(filePath);
         if (targetFile == null) return -1;
         int len = targetFile.setFileContent(text.getBytes());
         if (len != -1) this.fileCache.setFile(filePath, targetFile);
         return len;
+    }
+
+    public void disableCache(String filePath) {
+        this.fileCache.disableCache(filePath);
+    }
+
+    public boolean isOperationAllowed(String filePath, String operation) {
+        if (!openedFiles.containsKey(filePath)) return false;
+
+        Mode fileMode = openedFiles.get(filePath);
+
+        if (operation.equals("read")) return fileMode.canRead();
+        else if (operation.equals("write")) return fileMode.canWrite();
+        else return false;
+    }
+
+    public Mode getOpenedFileMode(String filePath) {
+        return openedFiles.get(filePath);
     }
 
     // set method
