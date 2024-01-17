@@ -56,11 +56,11 @@ public class File implements Serializable {
     */
     public byte[] getFileContent() {
         if (isReadAllowed == false) {
-            return null;
+            return new byte[0];
         }
 
         if (lastPosition < 0) {
-            return null;
+            return new byte[0];
         }
 
         // 0からlastPositionまでの部分配列を取得
