@@ -114,7 +114,9 @@ public class Client {
                         System.out.println("receivedObject = " + receivedObject);
 
                         File receivedFile = null;
-                        if (receivedObject.getClass() == File.class) {
+                        if (receivedObject == null) {
+                            receivedFile = null;
+                        } else if (receivedObject.getClass() == File.class) {
                             receivedFile = (File) receivedObject;
                             System.out.println(new String(receivedFile.getFileContent()));
                         } else {
@@ -144,6 +146,17 @@ public class Client {
                         File file = cacheHandler.getFile(filePath);
                         out.writeObject(file);
                         out.flush();
+
+                        Object receivedObject = in.readObject();
+                        boolean isSuccessful = false;
+                        if (receivedObject.getClass() == Boolean.class) {
+                            isSuccessful = (boolean) receivedObject;
+                            System.out.println("isSuccessful = " + isSuccessful);
+                        } else {
+                            EntryServerException e = (EntryServerException) receivedObject;
+                            System.out.println(e.getMessage());
+                        }
+                        if (!isSuccessful) continue;
 
                         // close
                         cacheHandler.closeFile(filePath);
