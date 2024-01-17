@@ -82,15 +82,15 @@ public class Client {
                     String message = keyboard.readLine();
 
                     String[] messageParts = message.split(" ");
-                    String instruction = messageParts[0];
+                    String opetarion = messageParts[0];
                     String hostname = messageParts[1];
                     String filePath = messageParts[2];
                     String mode = "rw";
                     if (messageParts.length == 4) mode = messageParts[3];
 
-                    if (instruction.equals("quit")) break;
+                    if (opetarion.equals("quit")) break;
 
-                    if (instruction.equals("open")) {
+                    if (opetarion.equals("open")) {
                         // open
                         out.writeObject(message); // 入力文字列を送信
                         out.flush();
@@ -122,13 +122,21 @@ public class Client {
                             System.out.println(e.getMessage());
                         }
                         cacheHandler.openFile(filePath, receivedFile, Mode.parseMode(mode));
-                    } else if (instruction.equals("read")) {
-                        String content = cacheHandler.getFileContent(filePath);
-                        System.out.println(content);
-                    } else if (instruction.equals("write")) {
-                        String content = keyboard.readLine();
-                        cacheHandler.setFileContent(filePath, content);
-                    } else if (instruction.equals("close")) {
+                    } else if (opetarion.equals("read")) {
+                        if (cacheHandler.isOperationAllowed(filePath, opetarion)) {
+                            String content = cacheHandler.getFileContent(filePath);
+                            System.out.println(content);
+                        } else {
+                            System.out.println("指定されたファイルを読み込む権限がありません。");
+                        }
+                    } else if (opetarion.equals("write")) {
+                        if (cacheHandler.isOperationAllowed(filePath, opetarion)) {
+                            String content = keyboard.readLine();
+                            cacheHandler.setFileContent(filePath, content);
+                        } else {
+                            System.out.println("指定されたファイルに書き込む権限がありません。");
+                        }
+                    } else if (opetarion.equals("close")) {
                         // write
                         out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
                         out.flush();

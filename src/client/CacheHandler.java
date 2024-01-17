@@ -108,6 +108,16 @@ public class CacheHandler {
         this.fileCache.disableCache(filePath);
     }
 
+    public boolean isOperationAllowed(String filePath, String operation) {
+        if (!openedFiles.containsKey(filePath)) return false;
+
+        Mode fileMode = openedFiles.get(filePath);
+
+        if (operation.equals("read")) return fileMode.canRead();
+        else if (operation.equals("write")) return fileMode.canWrite();
+        else return false;
+    }
+
     // set method
     /**
     * setFileCacheメソッド
