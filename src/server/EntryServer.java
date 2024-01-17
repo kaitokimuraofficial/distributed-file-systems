@@ -41,6 +41,10 @@ public class EntryServer {
      * ファイルサーバー上の各ファイルについて、各ユーザーの権限を管理する
      */
     private static final Map<String, FileUserGroup> fileUserGroups = new HashMap<>();
+    /**
+     * ファイルサーバー上の各ファイルについて、開かれたあとに書き込まれたかどうかを管理する
+     */
+    private static final Map<String, Boolean> isDirty = new HashMap<>();
 
     /**
      * キーをホスト名としたファイルサーバーのリスト
@@ -119,13 +123,15 @@ public class EntryServer {
             }
         }
         else {
-            if (!group.hasWriteUser()) {
+            if (!group.hasCurrentWrite()) {
                 group.addUser(clientId, true, false);
                 fileUserGroups.put(path, group);
             } else {
                 throw new EntryServerException("ファイルが他のユーザーによって使用中のため、開くことができません。");
             }
         }
+
+        isDirty.put(path, false);
     }
 
     /**
@@ -139,6 +145,10 @@ public class EntryServer {
         FileUserGroup group = fileUserGroups.get(path);
         if (group != null) {
             group.removeUser(clientId);
+        }
+
+        if (isDirty.containsKey(path)) {
+            isDirty.put(path, false);
         }
     }
 
@@ -175,7 +185,11 @@ public class EntryServer {
 
         if (group != null && group.allowWrite(clientId)) {
             FileServer fileServer = fileServers.get(hostname);
-            return fileServer != null ? fileServer.writeFile(p, superFile) : false;
+            if (fileServer != null && fileServer.writeFile(p, superFile)) {
+                isDirty.put(path, true);
+                return true;
+            }
+            return false;
         } else {
             throw new EntryServerException("指定されたファイルに書き込む権限がありません。");
         }
@@ -276,6 +290,14 @@ public class EntryServer {
                                 if (rpc.length < 3) break;
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
+
+                                // closeしたユーザーがwrite権限を持っていたら、他のユーザーのキャッシュを無効にする
+                                String path = joinFilePath(hostname, p);
+                                FileUserGroup group = fileUserGroups.get(path);
+                                if (group != null && group.allowWrite(clientId) && isDirty.get(path)) {
+                                    broadcastObject(clientId, String.format("invalidate %s %s", hostname, p));
+                                }
+
                                 closeFile(hostname, p, clientId);
                                 break;
                             default:
@@ -298,7 +320,7 @@ public class EntryServer {
         }
 
         /**
-         * 他の接続クライアントに対してメッセージをブロードキャストする（テスト用メソッド）
+         * 他の接続クライアントに対してメッセージをブロードキャストする
          * @param senderClientId 送信者のclientId
          * @param object 送信するObject
          */

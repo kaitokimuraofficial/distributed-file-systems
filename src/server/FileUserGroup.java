@@ -5,21 +5,21 @@ import java.util.Set;
 
 public class FileUserGroup {
     private final Set<Integer> readUsers = new HashSet<>();
-    private int writeUser = -1;
+    private int currentWrite = -1;
 
     public void addUser(int userId, boolean canRead, boolean canWrite) {
         if (canRead) {
             readUsers.add(userId);
         }
         if (canWrite) {
-            writeUser = userId;
+            currentWrite = userId;
         }
     }
 
     public void removeUser(int userId) {
         readUsers.remove(userId);
-        if (writeUser == userId) {
-            writeUser = -1;
+        if (currentWrite == userId) {
+            currentWrite = -1;
         }
     }
 
@@ -27,8 +27,8 @@ public class FileUserGroup {
      * 現在書き込み権限付きでファイルを開いているユーザーがいるかどうかを返す
      * @return 書き込み権限付きでファイルを開いているユーザーがいればtrue、そうでなければfalse
      */
-    public boolean hasWriteUser() {
-        return writeUser != -1;
+    public boolean hasCurrentWrite() {
+        return currentWrite != -1;
     }
 
     /**
@@ -36,7 +36,7 @@ public class FileUserGroup {
      * @return 書き込み権限付きでファイルを開けるならtrue、そうでなければfalse
      */
     public boolean canWrite() {
-        return !hasWriteUser() && readUsers.isEmpty();
+        return !hasCurrentWrite() && readUsers.isEmpty();
     }
 
     /**
@@ -54,7 +54,7 @@ public class FileUserGroup {
      * @return 指定されたユーザーがファイルの書き込み権限を持っているならtrue、そうでなければfalse
      */
     public boolean allowWrite(int clientId) {
-        return writeUser == clientId;
+        return currentWrite == clientId;
     }
 
 }
