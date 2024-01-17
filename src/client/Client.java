@@ -83,12 +83,12 @@ public class Client {
 
                     String[] messageParts = message.split(" ");
                     String opetarion = messageParts[0];
+                    if (opetarion.equals("quit")) return;
                     String hostname = messageParts[1];
                     String filePath = messageParts[2];
                     String mode = "rw";
                     if (messageParts.length == 4) mode = messageParts[3];
 
-                    if (opetarion.equals("quit")) break;
 
                     if (opetarion.equals("open")) {
                         // open
