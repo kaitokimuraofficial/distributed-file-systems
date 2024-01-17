@@ -50,7 +50,7 @@ public class CacheHandler {
         if (openedFiles.containsKey(filePath)) return true;
         File targetFile = this.getFile(filePath);
 
-        if (targetFile == null || (targetFile != null && !targetFile.getIsCacheValid())) {
+        if (targetFile == null || !targetFile.getIsCacheValid()) {
             File file;
             if (serverFile == null) {
                 Path p = Paths.get(filePath);
