@@ -1,6 +1,9 @@
 package test.file;
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.Test;
@@ -10,7 +13,8 @@ import src.file.File;
 
 /**
 * Fileクラスの単体テスト
-* @author　Kaito Kimura
+* @author Kaito Kimura
+* @author Keisuke Nakao
 */
 
 @RunWith(Enclosed.class)
@@ -24,8 +28,8 @@ public class FileTest {
         }
 
         @Test
-        public void getFileContentがnullを返す() {
-            assertEquals(file.getFileContent(), null);
+        public void getFileContentが空のバイト配列を返す() {
+            assertEquals(Arrays.equals(file.getFileContent(), new byte[0]), true);
         }
 
         @Test
@@ -86,8 +90,8 @@ public class FileTest {
         }
 
         @Test
-        public void getFileContentをするとnullが返される() {
-            assertEquals(file.getFileContent(), null);
+        public void getFileContentをすると空のバイト配列を返す() {
+            assertEquals(Arrays.equals(file.getFileContent(), new byte[0]), true);
         }
     }
 
