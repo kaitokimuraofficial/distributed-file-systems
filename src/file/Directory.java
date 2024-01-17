@@ -119,7 +119,7 @@ public class Directory {
                 if (name.equals(directory.getDirName())) {
                     foundDirectory = true;
                     directory.setFile(filePath, updatedFile);
-                    break;
+                    return;
                 }
             }
             if (!foundDirectory) {
@@ -147,7 +147,7 @@ public class Directory {
             for (Directory directory : this.directories) {
                 if (name.equals(directory.getDirName())) {
                     directory.disableCache(filePath);
-                    break;
+                    return;
                 }
             }
         }
