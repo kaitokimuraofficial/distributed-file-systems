@@ -1,6 +1,5 @@
 package src.client;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.nio.file.Path;
@@ -116,6 +115,10 @@ public class CacheHandler {
         if (operation.equals("read")) return fileMode.canRead();
         else if (operation.equals("write")) return fileMode.canWrite();
         else return false;
+    }
+
+    public Mode getOpenedFileMode(String filePath) {
+        return openedFiles.get(filePath);
     }
 
     // set method

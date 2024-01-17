@@ -107,21 +107,24 @@ public class Client {
                         if (!isSuccessful) continue;
                         
                         // read
-                        out.writeObject("read" + " " + hostname + " " + filePath); // 入力文字列を送信
-                        out.flush();
-
-                        receivedObject = in.readObject(); // データ受信
-                        System.out.println("receivedObject = " + receivedObject);
-
                         File receivedFile = null;
-                        if (receivedObject == null) {
-                            receivedFile = null;
-                        } else if (receivedObject.getClass() == File.class) {
-                            receivedFile = (File) receivedObject;
-                            System.out.println(new String(receivedFile.getFileContent()));
-                        } else {
-                            EntryServerException e = (EntryServerException) receivedObject;
-                            System.out.println(e.getMessage());
+
+                        if (!mode.equals("w")) {
+                            out.writeObject("read" + " " + hostname + " " + filePath); // 入力文字列を送信
+                            out.flush();
+
+                            receivedObject = in.readObject(); // データ受信
+                            System.out.println("receivedObject = " + receivedObject);
+
+                            if (receivedObject == null) {
+                                receivedFile = null;
+                            } else if (receivedObject.getClass() == File.class) {
+                                receivedFile = (File) receivedObject;
+                                System.out.println(new String(receivedFile.getFileContent()));
+                            } else {
+                                EntryServerException e = (EntryServerException) receivedObject;
+                                System.out.println(e.getMessage());
+                            }
                         }
                         cacheHandler.openFile(filePath, receivedFile, Mode.parseMode(mode));
                     } else if (opetarion.equals("read")) {
@@ -139,24 +142,27 @@ public class Client {
                             System.out.println("指定されたファイルに書き込む権限がありません。");
                         }
                     } else if (opetarion.equals("close")) {
+                        System.out.println(cacheHandler.getOpenedFileMode(filePath).canWrite());
+
                         // write
-                        out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
-                        out.flush();
+                        if (cacheHandler.getOpenedFileMode(filePath).canWrite()) {
+                            out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
+                            out.flush();
 
-                        File file = cacheHandler.getFile(filePath);
-                        out.writeObject(file);
-                        out.flush();
+                            File file = cacheHandler.getFile(filePath);
+                            out.writeObject(file);
+                            out.flush();
 
-                        Object receivedObject = in.readObject();
-                        boolean isSuccessful = false;
-                        if (receivedObject.getClass() == Boolean.class) {
-                            isSuccessful = (boolean) receivedObject;
-                            System.out.println("isSuccessful = " + isSuccessful);
-                        } else {
-                            EntryServerException e = (EntryServerException) receivedObject;
-                            System.out.println(e.getMessage());
+                            Object receivedObject = in.readObject();
+                            boolean isSuccessful = false;
+                            if (receivedObject.getClass() == Boolean.class) {
+                                isSuccessful = (boolean) receivedObject;
+                                System.out.println("isSuccessful = " + isSuccessful);
+                            } else {
+                                EntryServerException e = (EntryServerException) receivedObject;
+                                System.out.println(e.getMessage());
+                            }
                         }
-                        if (!isSuccessful) continue;
 
                         // close
                         cacheHandler.closeFile(filePath);
