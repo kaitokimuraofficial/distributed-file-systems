@@ -60,8 +60,6 @@ public class CacheHandler {
                 file = serverFile;
             }
             fileCache.setFile(filePath, file);
-            // System.out.println(file.getFileContent());
-            // System.out.println(this.getFileContent(filePath));
         }
         
         openedFiles.put(filePath, fileMode);
