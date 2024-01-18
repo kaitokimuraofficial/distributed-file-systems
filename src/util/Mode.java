@@ -48,5 +48,4 @@ public enum Mode {
         }
         return null;
     }
-
 }
