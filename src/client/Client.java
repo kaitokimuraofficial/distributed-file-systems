@@ -198,6 +198,7 @@ public class Client {
                             case OPEN:
                                 System.out.println("file opened successfully");
                                 this.openMode = args[3];
+                                if (openMode.equals("w")) cacheHandler.openFile(args[2], null, Mode.parseMode(this.openMode));
                                 break;
                             case READ:
                                 File receivedFile = null;
