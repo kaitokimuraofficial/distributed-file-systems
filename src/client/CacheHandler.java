@@ -128,4 +128,8 @@ public class CacheHandler {
     public Mode getOpenedFileMode(String filePath) {
         return openedFiles.get(filePath);
     }
+
+    public boolean getIsFileOpened(String filePath) {
+        return openedFiles.containsKey(filePath);
+    }
 }

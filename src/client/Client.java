@@ -104,6 +104,11 @@ public class Client {
 
 
                     if (operation.equals("open")) {
+                        if (cacheHandler.getIsFileOpened(filePath)) {
+                            System.out.println("指定されたファイルは既に開かれています。");
+                            continue;
+                        }
+
                         // open
                         out.writeObject(message); // 入力文字列を送信
                         out.flush();
@@ -127,6 +132,8 @@ public class Client {
                             System.out.println("指定されたファイルに書き込む権限がありません。");
                         }
                     } else if (operation.equals("close")) {
+                        if (!cacheHandler.getIsFileOpened(filePath)) continue;
+
                         // write
                         if (cacheHandler.getOpenedFileMode(filePath).canWrite()) {
                             out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
