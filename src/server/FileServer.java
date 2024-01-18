@@ -7,11 +7,11 @@ import java.nio.file.Path;
 
 /**
  * ファイルサーバー
- * @author Kaito Kimura
  * @author Aoyagi Tomoya
  */
 
 public class FileServer {
+
     /** このパスをルートとしてファイルサーバーを立てる */
     private final Path root;
 
@@ -42,7 +42,11 @@ public class FileServer {
 
         try {
             File f = new File(p.toString());
-            src.file.File superFile = new src.file.File(f.getName(), f.canRead(), f.canWrite());
+            src.file.File superFile = new src.file.File(
+                f.getName(),
+                f.canRead(),
+                f.canWrite()
+            );
             superFile.setFileContent(Files.readAllBytes(p));
             return superFile;
         } catch (IOException e) {
@@ -73,12 +77,10 @@ public class FileServer {
 
         try {
             Files.write(p, superFile.getFileContent());
-            // TODO: 属性の反映
             return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
     }
-
 }
