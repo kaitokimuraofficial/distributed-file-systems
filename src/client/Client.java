@@ -200,8 +200,14 @@ public class Client {
                                 this.openMode = args[3];
                                 break;
                             case READ:
-                                File receivedFile = (File) data;
-                                System.out.println(new String(receivedFile.getFileContent()));
+                                File receivedFile = null;
+                                if (data == null) {
+                                    receivedFile = null;
+                                } else if (receivedObject.getClass() == File.class) {
+                                    receivedFile = (File) data;
+                                    System.out.println(new String(receivedFile.getFileContent()));
+                                }
+
                                 cacheHandler.openFile(args[2], receivedFile, Mode.parseMode(this.openMode));
                                 break;
                             case WRITE:
