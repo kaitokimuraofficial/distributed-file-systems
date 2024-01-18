@@ -87,7 +87,7 @@ public class Client {
                     if (operation.equals("quit")) break;
 
                     if (messageParts.length <= 2) {
-                        System.out.println("You need to add more commands");
+                        System.out.println("引数の数が不正です。");
                         continue;
                     }
 
