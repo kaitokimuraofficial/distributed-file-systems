@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import src.file.Directory;
 import src.file.File;
 import src.util.Mode;
 
@@ -128,19 +127,5 @@ public class CacheHandler {
 
     public Mode getOpenedFileMode(String filePath) {
         return openedFiles.get(filePath);
-    }
-
-    // set method
-    /**
-     * setFileCacheメソッド
-     * FileCacheが持つDirectoryクラスを更新する
-     * ClientがOpenをしたり、他のClientのWriteによってキャッシュがUpdateされる場面
-     * @param root 更新後のディレクトリの根
-     * @return 成功したらtrue、失敗したらfalse
-     */
-    public boolean setFileCache(Directory root) {
-        if (root == null) return false;
-        this.fileCache.setRoot(root);
-        return true;
     }
 }
