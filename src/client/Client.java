@@ -5,8 +5,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 import src.file.File;
 import src.server.EntryServer;
+import src.server.EntryServerResponse;
 import src.server.exception.EntryServerException;
 import src.util.Mode;
+import src.util.OperationType;
 
 /**
 * 分散ファイルシステムを使用するクライアント
@@ -75,6 +77,9 @@ public class Client {
             cacheHandler = new CacheHandler(clientId);
             System.out.println("あなたのクライアントIDは " + cid + " です.");
 
+            // 受け取ったメッセージの処理は全部こっちでやる
+            new Thread(new ReceivedObjectHandler(in)).start();
+
             try (BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in))) {
                 while (true) {
                     System.out.print(">> ");
@@ -103,38 +108,10 @@ public class Client {
                         out.writeObject(message); // 入力文字列を送信
                         out.flush();
 
-                        Object receivedObject = in.readObject(); // データ受信
-                        boolean isSuccessful = false;
-                        if (receivedObject.getClass() == Boolean.class) {
-                            isSuccessful = (boolean) receivedObject;
-                            System.out.println("isSuccessful = " + isSuccessful);
-                        } else {
-                            EntryServerException e = (EntryServerException) receivedObject;
-                            System.out.println(e.getMessage());
-                        }
-                        if (!isSuccessful) continue;
-                        
-                        // read
-                        File receivedFile = null;
-
                         if (!mode.equals("w")) {
                             out.writeObject("read" + " " + hostname + " " + filePath); // 入力文字列を送信
                             out.flush();
-
-                            receivedObject = in.readObject(); // データ受信
-                            System.out.println("receivedObject = " + receivedObject);
-
-                            if (receivedObject == null) {
-                                receivedFile = null;
-                            } else if (receivedObject.getClass() == File.class) {
-                                receivedFile = (File) receivedObject;
-                                System.out.println(new String(receivedFile.getFileContent()));
-                            } else {
-                                EntryServerException e = (EntryServerException) receivedObject;
-                                System.out.println(e.getMessage());
-                            }
                         }
-                        cacheHandler.openFile(filePath, receivedFile, Mode.parseMode(mode));
                     } else if (operation.equals("read")) {
                         if (cacheHandler.isOperationAllowed(filePath, operation)) {
                             String content = cacheHandler.getFileContent(filePath);
@@ -162,16 +139,6 @@ public class Client {
 
                             out.writeObject(sendFile);
                             out.flush();
-
-                            Object receivedObject = in.readObject();
-                            boolean isSuccessful = false;
-                            if (receivedObject.getClass() == Boolean.class) {
-                                isSuccessful = (boolean) receivedObject;
-                                System.out.println("isSuccessful = " + isSuccessful);
-                            } else {
-                                EntryServerException e = (EntryServerException) receivedObject;
-                                System.out.println(e.getMessage());
-                            }
                         }
 
                         // close
@@ -185,6 +152,69 @@ public class Client {
         } finally {
             System.out.println("closing...");
             socket.close();
+        }
+    }
+
+    /**
+     * サーバーから受け取ったメッセージを処理する用のスレッド
+     */
+    private static class ReceivedObjectHandler implements Runnable {
+        private final ObjectInputStream in;
+        private String openMode;
+
+        public ReceivedObjectHandler(ObjectInputStream in) {
+            this.in = in;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    Object receivedObject = in.readObject(); // データ受信
+                    System.out.println("receivedObject = " + receivedObject);
+
+                    if (receivedObject.getClass() == String.class) {
+                        // TODO: キャッシュを無効化する処理をここに書く
+                        String receivedCommand = (String) receivedObject;
+                        String[] args = receivedCommand.split("\\s+");
+
+                        String hostname = args[1];
+                        String filePath = args[2];
+                    } else if (receivedObject.getClass() == EntryServerResponse.class) {
+                        EntryServerResponse response = (EntryServerResponse) receivedObject;
+                        Object data = response.getData();
+
+                        // 操作に失敗したとき
+                        if (!response.isSuccessful()) {
+                            EntryServerException e = (EntryServerException) data;
+                            System.out.println(e.getMessage());
+                            continue;
+                        }
+
+                        String sentCommand = response.getReceivedCommand();
+                        String[] args = sentCommand.split("\\s+");
+
+                        switch (response.getOpType()) {
+                            case OperationType.OPEN:
+                                System.out.println("file opened successfully");
+                                this.openMode = args[3];
+                                break;
+                            case OperationType.READ:
+                                File receivedFile = (File) data;
+                                System.out.println(new String(receivedFile.getFileContent()));
+                                cacheHandler.openFile(args[2], receivedFile, Mode.parseMode(this.openMode));
+                                break;
+                            case OperationType.WRITE:
+                                System.out.println("file updated successfully");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

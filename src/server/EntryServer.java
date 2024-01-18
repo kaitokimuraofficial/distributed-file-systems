@@ -2,6 +2,7 @@ package src.server;
 import src.file.File;
 import src.server.exception.EntryServerException;
 import src.util.Mode;
+import src.util.OperationType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -211,9 +212,9 @@ public class EntryServer {
          * 引数の数が合っていないときの例外処理
          * @throws IOException
          */
-        private void throwArgumentMismatchError() throws IOException {
+        private void throwArgumentMismatchError(OperationType opType, String receivedCommand) throws IOException {
             EntryServerException e = new EntryServerException("引数の数が不正です。");
-            clientStreams.get(clientId).writeObject(e);
+            clientStreams.get(clientId).writeObject(EntryServerResponse.error(opType, receivedCommand, e));
             clientStreams.get(clientId).flush();
         }
 
@@ -236,16 +237,16 @@ public class EntryServer {
                             case "read":
                                 // read [hostname] [path]
                                 if (rpc.length < 3) {
-                                    throwArgumentMismatchError();
+                                    throwArgumentMismatchError(OperationType.READ, message);
                                     break;
                                 }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 try {
                                     File file = readFile(hostname, p, clientId);
-                                    clientStreams.get(clientId).writeObject(file);
+                                    clientStreams.get(clientId).writeObject(EntryServerResponse.ok(OperationType.READ, message, file));
                                 } catch (EntryServerException e) {
-                                    clientStreams.get(clientId).writeObject(e);
+                                    clientStreams.get(clientId).writeObject(EntryServerResponse.error(OperationType.READ, message, e));
                                 }
                                 clientStreams.get(clientId).flush();
                                 break;
@@ -253,7 +254,7 @@ public class EntryServer {
                                 // write [hostname] [path]
                                 // [data]
                                 if (rpc.length < 3) {
-                                    throwArgumentMismatchError();
+                                    throwArgumentMismatchError(OperationType.WRITE, message);
                                     break;
                                 }
                                 hostname = rpc[1];
@@ -261,16 +262,16 @@ public class EntryServer {
                                 Object data = clientInputStream.readObject();
                                 try {
                                     boolean res = writeFile(hostname, p, clientId, (File) data);
-                                    clientStreams.get(clientId).writeObject(res);
+                                    clientStreams.get(clientId).writeObject(EntryServerResponse.ok(OperationType.WRITE, message, res));
                                 } catch (EntryServerException e) {
-                                    clientStreams.get(clientId).writeObject(e);
+                                    clientStreams.get(clientId).writeObject(EntryServerResponse.error(OperationType.WRITE, message, e));
                                 }
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "open":
                                 // open [hostname] [path] [mode]
                                 if (rpc.length < 4) {
-                                    throwArgumentMismatchError();
+                                    throwArgumentMismatchError(OperationType.OPEN, message);
                                     break;
                                 }
                                 hostname = rpc[1];
@@ -279,15 +280,18 @@ public class EntryServer {
                                 if (mode == null) break;
                                 try {
                                     openFile(hostname, p, clientId, mode);
-                                    clientStreams.get(clientId).writeObject(true);
+                                    clientStreams.get(clientId).writeObject(EntryServerResponse.ok(OperationType.OPEN, message, true));
                                 } catch (EntryServerException e) {
-                                    clientStreams.get(clientId).writeObject(e);
+                                    clientStreams.get(clientId).writeObject(EntryServerResponse.error(OperationType.OPEN, message, e));
                                 }
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "close":
                                 // close [hostname] [path]
-                                if (rpc.length < 3) break;
+                                if (rpc.length < 3) {
+                                    throwArgumentMismatchError(OperationType.CLOSE, message);
+                                    break;
+                                }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
 
