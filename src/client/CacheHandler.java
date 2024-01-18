@@ -112,6 +112,7 @@ public class CacheHandler {
         File targetFile = this.getFile(filePath);
         if (targetFile == null) return false;
         targetFile.setIsCacheValid(bool);
+        this.fileCache.setFile(filePath, targetFile);
         return true;
     }
 
