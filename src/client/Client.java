@@ -3,7 +3,6 @@ package src.client;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-
 import src.file.File;
 import src.server.EntryServer;
 import src.server.exception.EntryServerException;
@@ -81,16 +80,25 @@ public class Client {
                     System.out.print(">> ");
                     String message = keyboard.readLine();
 
-                    String[] messageParts = message.split(" ");
-                    String opetarion = messageParts[0];
-                    if (opetarion.equals("quit")) break;
+                    String[] messageParts = message.trim().split("\\s+");
+
+                    String operation = messageParts[0];
+
+                    if (operation.equals("quit")) break;
+
+                    if (messageParts.length <= 2) {
+                        System.out.println("引数の数が不正です。");
+                        continue;
+                    }
+
                     String hostname = messageParts[1];
                     String filePath = messageParts[2];
-                    String mode = "rw";
-                    if (messageParts.length == 4) mode = messageParts[3];
+                    String mode = (messageParts.length == 4)
+                        ? messageParts[3]
+                        : "rw";
 
 
-                    if (opetarion.equals("open")) {
+                    if (operation.equals("open")) {
                         // open
                         out.writeObject(message); // 入力文字列を送信
                         out.flush();
@@ -127,21 +135,21 @@ public class Client {
                             }
                         }
                         cacheHandler.openFile(filePath, receivedFile, Mode.parseMode(mode));
-                    } else if (opetarion.equals("read")) {
-                        if (cacheHandler.isOperationAllowed(filePath, opetarion)) {
+                    } else if (operation.equals("read")) {
+                        if (cacheHandler.isOperationAllowed(filePath, operation)) {
                             String content = cacheHandler.getFileContent(filePath);
                             System.out.println(content);
                         } else {
                             System.out.println("指定されたファイルを読み込む権限がありません。");
                         }
-                    } else if (opetarion.equals("write")) {
-                        if (cacheHandler.isOperationAllowed(filePath, opetarion)) {
+                    } else if (operation.equals("write")) {
+                        if (cacheHandler.isOperationAllowed(filePath, operation)) {
                             String content = keyboard.readLine();
                             cacheHandler.setFileContent(filePath, content);
                         } else {
                             System.out.println("指定されたファイルに書き込む権限がありません。");
                         }
-                    } else if (opetarion.equals("close")) {
+                    } else if (operation.equals("close")) {
                         // write
                         if (cacheHandler.getOpenedFileMode(filePath).canWrite()) {
                             out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
