@@ -229,6 +229,8 @@ public class EntryServer {
                     // 受け取ったオブジェクトが文字列型の場合
                     if (receivedObject.getClass() == String.class) {
                         String message = (String) receivedObject;
+                        if (message.length() == 0) continue;
+
                         String[] rpc = message.split(" ");
                         String hostname;
                         Path p;

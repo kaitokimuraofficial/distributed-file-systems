@@ -195,16 +195,16 @@ public class Client {
                         String[] args = sentCommand.split("\\s+");
 
                         switch (response.getOpType()) {
-                            case OperationType.OPEN:
+                            case OPEN:
                                 System.out.println("file opened successfully");
                                 this.openMode = args[3];
                                 break;
-                            case OperationType.READ:
+                            case READ:
                                 File receivedFile = (File) data;
                                 System.out.println(new String(receivedFile.getFileContent()));
                                 cacheHandler.openFile(args[2], receivedFile, Mode.parseMode(this.openMode));
                                 break;
-                            case OperationType.WRITE:
+                            case WRITE:
                                 System.out.println("file updated successfully");
                                 break;
                             default:
