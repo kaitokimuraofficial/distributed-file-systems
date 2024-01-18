@@ -113,7 +113,7 @@ public class Directory {
         if (filePath.size() == 0) {
             for (File file : this.files) {
                 if (name.equals(file.getFileName())) {
-                    file = updatedFile;
+                    file.setFileContent(updatedFile.getFileContent());
                     return;
                 }
             }
