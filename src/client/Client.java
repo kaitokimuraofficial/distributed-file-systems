@@ -3,6 +3,8 @@ package src.client;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
+
 import src.file.File;
 import src.server.EntryServer;
 import src.server.EntryServerResponse;
@@ -187,6 +189,8 @@ public class Client {
 
                         String hostname = args[1];
                         String filePath = args[2];
+
+                        System.out.println(receivedCommand);
                     } else if (receivedObject.getClass() == EntryServerResponse.class) {
                         EntryServerResponse response = (EntryServerResponse) receivedObject;
                         Object data = response.getData();
@@ -220,6 +224,7 @@ public class Client {
                         }
                     }
                 }
+            } catch (SocketException e) {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
