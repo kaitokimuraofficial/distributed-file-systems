@@ -48,7 +48,7 @@ public class CacheHandler {
         if (openedFiles.containsKey(filePath)) return true;
         File targetFile = this.getFile(filePath);
 
-        if (targetFile == null || !targetFile.getIsCacheValid()) {
+        if (targetFile == null || !this.getIsCacheValid(filePath)) {
             File file;
             Path p = Paths.get(filePath);
             file =
@@ -99,6 +99,12 @@ public class CacheHandler {
         int len = targetFile.setFileContent(text.getBytes());
         if (len != -1) this.fileCache.setFile(filePath, targetFile);
         return len;
+    }
+
+    public boolean getIsCacheValid(String filePath) {
+        File targetFile = this.getFile(filePath);
+        if (targetFile == null) return false;
+        return targetFile.getIsCacheValid();
     }
 
     /**

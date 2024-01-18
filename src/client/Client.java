@@ -115,7 +115,7 @@ public class Client {
                         out.writeObject(message); // 入力文字列を送信
                         out.flush();
 
-                        if (!mode.equals("w")) {
+                        if (!mode.equals("w") && !cacheHandler.getIsCacheValid(filePath)) {
                             out.writeObject("read" + " " + hostname + " " + filePath); // 入力文字列を送信
                             out.flush();
                         }
@@ -183,14 +183,19 @@ public class Client {
                     System.out.println("receivedObject = " + receivedObject);
 
                     if (receivedObject.getClass() == String.class) {
-                        // TODO: キャッシュを無効化する処理をここに書く
+                        // キャッシュを無効化する処理
                         String receivedCommand = (String) receivedObject;
                         String[] args = receivedCommand.split("\\s+");
 
-                        String hostname = args[1];
+                        String operation = args[0];
+                        // String hostname = args[1];
                         String filePath = args[2];
-
-                        System.out.println(receivedCommand);
+                        
+                        if (operation.equals("invalidate")) {
+                            if (cacheHandler.getFile(filePath) == null) continue;
+                            System.out.println(receivedCommand);
+                            cacheHandler.setIsCacheValid(filePath, false);
+                        }
                     } else if (receivedObject.getClass() == EntryServerResponse.class) {
                         EntryServerResponse response = (EntryServerResponse) receivedObject;
                         Object data = response.getData();
@@ -208,8 +213,9 @@ public class Client {
                         switch (response.getOpType()) {
                             case OPEN:
                                 System.out.println("file opened successfully");
+                                String filePath = args[2];
                                 this.openMode = args[3];
-                                if (openMode.equals("w")) cacheHandler.openFile(args[2], null, Mode.parseMode(this.openMode));
+                                if (openMode.equals("w") || cacheHandler.getIsCacheValid(filePath)) cacheHandler.openFile(args[2], null, Mode.parseMode(this.openMode));
                                 break;
                             case READ:
                                 File receivedFile = (File) data;
