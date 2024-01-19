@@ -52,14 +52,24 @@ public class EntryServer {
     private static final Map<String, FileServer> fileServers = new HashMap<>();
 
     private static void initFileServers() {
-        String fsRoot = System.getenv("FS_ROOT");
-        if (fsRoot == null) {
-            System.out.println("FS_ROOT is not set");
-            System.exit(1);
-        }
+        System.out.println("Setting up local file servers ...");
+        final String SERVER_HOSTNAME_BASE = "localhost";
 
-        FileServer a = new FileServer(Paths.get(fsRoot));
-        fileServers.put("localhost", a);
+        for (int i = 0; ; i++) {
+            String fsRoot = System.getenv(String.format("FS_ROOT_%d", i));
+            if (fsRoot == null) {
+                if (i == 0) {
+                    System.out.println("FS_ROOT_0 has to be set.");
+                    System.exit(1);
+                } else {
+                    break;
+                }
+            }
+
+            FileServer fs = new FileServer(Paths.get(fsRoot));
+            fileServers.put(SERVER_HOSTNAME_BASE + i, fs);
+            System.out.println(String.format("Registered: %s -> %s", SERVER_HOSTNAME_BASE + i, fsRoot));
+        }
     }
 
     /**
