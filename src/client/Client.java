@@ -137,7 +137,7 @@ public class Client {
                         if (!cacheHandler.getIsFileOpened(filePath)) continue;
 
                         // write
-                        if (cacheHandler.getOpenedFileMode(filePath).canWrite()) {
+                        if (cacheHandler.getOpenedFileMode(filePath).canWrite() && cacheHandler.getIsModified(filePath)) {
                             out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
                             out.flush();
 

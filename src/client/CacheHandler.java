@@ -57,6 +57,7 @@ public class CacheHandler {
                     : serverFile;
 
             fileCache.setFile(filePath, file);
+            this.setIsModified(filePath, false);
         }
 
         openedFiles.put(filePath, fileMode);
@@ -117,6 +118,20 @@ public class CacheHandler {
         File targetFile = this.getFile(filePath);
         if (targetFile == null) return false;
         targetFile.setIsCacheValid(bool);
+        this.fileCache.setFile(filePath, targetFile);
+        return true;
+    }
+
+    public boolean getIsModified(String filePath) {
+        File targetFile = this.getFile(filePath);
+        if (targetFile == null) return false;
+        return targetFile.getIsModified();
+    }
+
+    public boolean setIsModified(String filePath, boolean bool) {
+        File targetFile = this.getFile(filePath);
+        if (targetFile == null) return false;
+        targetFile.setIsModified(bool);
         this.fileCache.setFile(filePath, targetFile);
         return true;
     }
