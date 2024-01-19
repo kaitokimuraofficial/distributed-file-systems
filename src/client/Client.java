@@ -10,7 +10,6 @@ import src.server.EntryServer;
 import src.server.EntryServerResponse;
 import src.server.exception.EntryServerException;
 import src.util.Mode;
-import src.util.OperationType;
 
 /**
 * 分散ファイルシステムを使用するクライアント
