@@ -101,15 +101,16 @@ public class Client {
                         continue;
                     }
 
-                    String hostname = messageParts[1];
+                    String hostName = messageParts[1];
                     String filePath = messageParts[2];
+                    String cacheFilePath = String.format("%s/%s", hostName, filePath);
                     String mode = (messageParts.length == 4)
                         ? messageParts[3]
                         : "rw";
 
 
                     if (operation.equals("open")) {
-                        if (cacheHandler.getIsFileOpened(filePath)) {
+                        if (cacheHandler.getIsFileOpened(cacheFilePath)) {
                             System.out.println("指定されたファイルは既に開かれています。");
                             continue;
                         }
@@ -118,33 +119,33 @@ public class Client {
                         out.writeObject(message);
                         out.flush();
 
-                        if (!mode.equals("w") && !cacheHandler.getIsCacheValid(filePath)) {
-                            out.writeObject("read" + " " + hostname + " " + filePath); // 入力文字列を送信
+                        if (!mode.equals("w") && !cacheHandler.getIsCacheValid(cacheFilePath)) {
+                            out.writeObject("read" + " " + hostName + " " + filePath); // 入力文字列を送信
                             out.flush();
                         }
                     } else if (operation.equals("read")) {
-                        if (cacheHandler.isOperationAllowed(filePath, operation)) {
-                            String content = cacheHandler.getFileContent(filePath);
+                        if (cacheHandler.isOperationAllowed(cacheFilePath, operation)) {
+                            String content = cacheHandler.getFileContent(cacheFilePath);
                             System.out.println(content);
                         } else {
                             System.out.println("指定されたファイルを読み込む権限がありません。");
                         }
                     } else if (operation.equals("write")) {
-                        if (cacheHandler.isOperationAllowed(filePath, operation)) {
+                        if (cacheHandler.isOperationAllowed(cacheFilePath, operation)) {
                             String content = keyboard.readLine();
-                            cacheHandler.setFileContent(filePath, content);
+                            cacheHandler.setFileContent(cacheFilePath, content);
                         } else {
                             System.out.println("指定されたファイルに書き込む権限がありません。");
                         }
                     } else if (operation.equals("close")) {
-                        if (!cacheHandler.getIsFileOpened(filePath)) continue;
+                        if (!cacheHandler.getIsFileOpened(cacheFilePath)) continue;
 
                         // write
-                        if (cacheHandler.getOpenedFileMode(filePath).canWrite() && cacheHandler.getIsModified(filePath)) {
-                            out.writeObject("write" + " " + hostname + " " + filePath);
+                        if (cacheHandler.getOpenedFileMode(cacheFilePath).canWrite() && cacheHandler.getIsModified(cacheFilePath)) {
+                            out.writeObject("write" + " " + hostName + " " + filePath);
                             out.flush();
 
-                            File cacheFile = cacheHandler.getFile(filePath);
+                            File cacheFile = cacheHandler.getFile(cacheFilePath);
 
                             File sendFile = new File(cacheFile.getFileName(), cacheFile.getIsReadAllowed(), cacheFile.getIsWriteAllowed());
                             sendFile.setFileContent(cacheFile.getFileContent());
@@ -154,7 +155,7 @@ public class Client {
                         }
 
                         // close
-                        cacheHandler.closeFile(filePath);
+                        cacheHandler.closeFile(cacheFilePath);
 
                         out.writeObject(message);
                         out.flush();
@@ -191,13 +192,14 @@ public class Client {
                         String[] args = receivedCommand.split("\\s+");
 
                         String operation = args[0];
-                        // String hostname = args[1];
+                        String hostName = args[1];
                         String filePath = args[2];
+                        String cacheFilePath = String.format("%s/%s", hostName, filePath);
                         
                         if (operation.equals("invalidate")) {
-                            if (cacheHandler.getFile(filePath) == null) continue;
+                            if (cacheHandler.getFile(cacheFilePath) == null) continue;
                             System.out.println(receivedCommand);
-                            cacheHandler.setIsCacheValid(filePath, false);
+                            cacheHandler.setIsCacheValid(cacheFilePath, false);
                         }
                     } else if (receivedObject.getClass() == EntryServerResponse.class) {
                         EntryServerResponse response = (EntryServerResponse) receivedObject;
@@ -212,33 +214,36 @@ public class Client {
 
                         String sentCommand = response.getReceivedCommand();
                         String[] args = sentCommand.split("\\s+");
-                        String hostname, filePath;
+                        String hostName, filePath, cacheFilePath;
 
                         switch (response.getOpType()) {
                             case OPEN:
                                 System.out.println("file opened successfully");
+                                hostName = args[1];
                                 filePath = args[2];
+                                cacheFilePath = String.format("%s/%s", hostName, filePath);
                                 this.openMode = args[3];
-                                if (openMode.equals("w") || cacheHandler.getIsCacheValid(filePath)) {
-                                    cacheHandler.openFile(args[2], null, Mode.parseMode(this.openMode));
+                                if (openMode.equals("w") || cacheHandler.getIsCacheValid(cacheFilePath)) {
+                                    cacheHandler.openFile(cacheFilePath, null, Mode.parseMode(this.openMode));
                                 }
                                 break;
                             case READ:
-                                hostname = args[1];
+                                hostName = args[1];
                                 filePath = args[2];
+                                cacheFilePath = String.format("%s/%s", hostName, filePath);
                                 File receivedFile = (data != null) ? (File) data : null;
                                 if (receivedFile != null) System.out.println(new String(receivedFile.getFileContent()));
                                 if (receivedFile == null && this.openMode.equals("r")) {
                                     System.out.println("存在しないファイルを読み出し権限のみで開くことはできません。");
 
                                     // close 処理
-                                    cacheHandler.closeFile(filePath);
+                                    cacheHandler.closeFile(cacheFilePath);
 
-                                    out.writeObject("close" + " " + hostname + " " + filePath);
+                                    out.writeObject("close" + " " + hostName + " " + filePath);
                                     out.flush();
                                     break;
                                 }
-                                cacheHandler.openFile(args[2], receivedFile, Mode.parseMode(this.openMode));
+                                cacheHandler.openFile(cacheFilePath, receivedFile, Mode.parseMode(this.openMode));
                                 break;
                             case WRITE:
                                 System.out.println("file updated successfully");
