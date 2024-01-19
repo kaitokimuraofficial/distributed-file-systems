@@ -21,6 +21,9 @@ import src.util.OperationType;
 public class Client {
     private static CacheHandler cacheHandler;
     private static int clientId;
+    private static Socket socket;
+    private static ObjectInputStream in;
+    private static ObjectOutputStream out;
 
     private Client() {}
 
@@ -66,12 +69,12 @@ public class Client {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         InetAddress addr = InetAddress.getByName("localhost"); // IP アドレスへの変換
         System.out.println("addr = " + addr);
-        Socket socket = new Socket(addr, EntryServer.PORT); // ソケットの生成
+        socket = new Socket(addr, EntryServer.PORT); // ソケットの生成
         try {
             System.out.println("socket = " + socket);
 
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream()); // 送信バッファ設定
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream()); // データ受信用バッファの設定
+            out = new ObjectOutputStream(socket.getOutputStream()); // 送信バッファ設定
+            in = new ObjectInputStream(socket.getInputStream()); // データ受信用バッファの設定
 
             // クライアントIDを受信
             int cid = (int) in.readObject();
@@ -112,7 +115,7 @@ public class Client {
                         }
 
                         // open
-                        out.writeObject(message); // 入力文字列を送信
+                        out.writeObject(message);
                         out.flush();
 
                         if (!mode.equals("w") && !cacheHandler.getIsCacheValid(filePath)) {
@@ -138,7 +141,7 @@ public class Client {
 
                         // write
                         if (cacheHandler.getOpenedFileMode(filePath).canWrite() && cacheHandler.getIsModified(filePath)) {
-                            out.writeObject("write" + " " + hostname + " " + filePath); // 入力文字列を送信
+                            out.writeObject("write" + " " + hostname + " " + filePath);
                             out.flush();
 
                             File cacheFile = cacheHandler.getFile(filePath);
@@ -209,17 +212,32 @@ public class Client {
 
                         String sentCommand = response.getReceivedCommand();
                         String[] args = sentCommand.split("\\s+");
+                        String hostname, filePath;
 
                         switch (response.getOpType()) {
                             case OPEN:
                                 System.out.println("file opened successfully");
-                                String filePath = args[2];
+                                filePath = args[2];
                                 this.openMode = args[3];
-                                if (openMode.equals("w") || cacheHandler.getIsCacheValid(filePath)) cacheHandler.openFile(args[2], null, Mode.parseMode(this.openMode));
+                                if (openMode.equals("w") || cacheHandler.getIsCacheValid(filePath)) {
+                                    cacheHandler.openFile(args[2], null, Mode.parseMode(this.openMode));
+                                }
                                 break;
                             case READ:
-                                File receivedFile = (File) data;
-                                System.out.println(new String(receivedFile.getFileContent()));
+                                hostname = args[1];
+                                filePath = args[2];
+                                File receivedFile = (data != null) ? (File) data : null;
+                                if (receivedFile != null) System.out.println(new String(receivedFile.getFileContent()));
+                                if (receivedFile == null && this.openMode.equals("r")) {
+                                    System.out.println("存在しないファイルを読み出し権限のみで開くことはできません。");
+
+                                    // close 処理
+                                    cacheHandler.closeFile(filePath);
+
+                                    out.writeObject("close" + " " + hostname + " " + filePath);
+                                    out.flush();
+                                    break;
+                                }
                                 cacheHandler.openFile(args[2], receivedFile, Mode.parseMode(this.openMode));
                                 break;
                             case WRITE:
