@@ -8,7 +8,7 @@ sequenceDiagram
   participant ES as EntryServer　
   participant FS as FileServer
 
-  C->>+ES: open [host] [file] [op]
+  C->>+ES: open [host] [path] [mode]
   ES->>FS: getFile(filePath)
   FS-->>ES: return File
   ES-->>-C: return File
