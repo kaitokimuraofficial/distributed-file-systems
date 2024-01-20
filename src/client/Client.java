@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
-
 import src.file.File;
 import src.server.EntryServer;
 import src.server.EntryServerResponse;
@@ -12,12 +11,13 @@ import src.server.exception.EntryServerException;
 import src.util.Mode;
 
 /**
-* 分散ファイルシステムを使用するクライアント
-* @author Kaito Kimura
-* @author Keisuke Nakao
-*/
+ * 分散ファイルシステムを使用するクライアント
+ * @author Kaito Kimura
+ * @author Keisuke Nakao
+ */
 
 public class Client {
+
     private static CacheHandler cacheHandler;
     private static int clientId;
     private static Socket socket;
@@ -35,37 +35,38 @@ public class Client {
     }
 
     /**
-    * readメソッド
-    * Fileの内容を表示する
-    * ClientがあるFileの内容を表示したい場面
-    * @param filePath 見つけたいFileのパス
-    * @return void
-    */
+     * readメソッド
+     * Fileの内容を表示する
+     * ClientがあるFileの内容を表示したい場面
+     * @param filePath 見つけたいFileのパス
+     * @return void
+     */
     public void read(String filePath) {
         String fileContent = cacheHandler.getFileContent(filePath);
         System.out.println(fileContent);
     }
 
     /**
-    * writeメソッド
-    * Fileの内容をString変換して返す
-    * ClientがあるFileの内容を書き換える場面
-    * @param fileName 見つけたいFileのパス
-    * @param text Fileに書き込みたい内容
-    * @return void
-    */
+     * writeメソッド
+     * Fileの内容をString変換して返す
+     * ClientがあるFileの内容を書き換える場面
+     * @param fileName 見つけたいFileのパス
+     * @param text Fileに書き込みたい内容
+     * @return void
+     */
     public void write(String filePath, String text) {
         int res = cacheHandler.setFileContent(filePath, text);
 
         // cacheHandlerがsetFileContent()に失敗した
-        if (res<0) {
+        if (res < 0) {
             System.out.println("Failed to write");
             return;
         }
         System.out.println("Success!");
     }
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args)
+        throws IOException, ClassNotFoundException {
         InetAddress addr = InetAddress.getByName("localhost"); // IP アドレスへの変換
         System.out.println("addr = " + addr);
         socket = new Socket(addr, EntryServer.PORT); // ソケットの生成
@@ -84,7 +85,11 @@ public class Client {
             // 受け取ったメッセージの処理は全部こっちでやる
             new Thread(new ReceivedObjectHandler(in)).start();
 
-            try (BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in))) {
+            try (
+                BufferedReader keyboard = new BufferedReader(
+                    new InputStreamReader(System.in)
+                )
+            ) {
                 while (true) {
                     System.out.print(">> ");
                     String message = keyboard.readLine();
@@ -102,15 +107,20 @@ public class Client {
 
                     String hostName = messageParts[1];
                     String filePath = messageParts[2];
-                    String cacheFilePath = String.format("%s/%s", hostName, filePath);
+                    String cacheFilePath = String.format(
+                        "%s/%s",
+                        hostName,
+                        filePath
+                    );
                     String mode = (messageParts.length == 4)
                         ? messageParts[3]
                         : "rw";
 
-
                     if (operation.equals("open")) {
                         if (cacheHandler.getIsFileOpened(cacheFilePath)) {
-                            System.out.println("指定されたファイルは既に開かれています。");
+                            System.out.println(
+                                "指定されたファイルは既に開かれています。"
+                            );
                             continue;
                         }
 
@@ -118,35 +128,71 @@ public class Client {
                         out.writeObject(message);
                         out.flush();
 
-                        if (!mode.equals("w") && !cacheHandler.getIsCacheValid(cacheFilePath)) {
-                            out.writeObject("read" + " " + hostName + " " + filePath); // 入力文字列を送信
+                        if (
+                            !mode.equals("w") &&
+                            !cacheHandler.getIsCacheValid(cacheFilePath)
+                        ) {
+                            out.writeObject(
+                                "read" + " " + hostName + " " + filePath
+                            ); // 入力文字列を送信
                             out.flush();
                         }
                     } else if (operation.equals("read")) {
-                        if (cacheHandler.isOperationAllowed(cacheFilePath, operation)) {
-                            String content = cacheHandler.getFileContent(cacheFilePath);
+                        if (
+                            cacheHandler.isOperationAllowed(
+                                cacheFilePath,
+                                operation
+                            )
+                        ) {
+                            String content = cacheHandler.getFileContent(
+                                cacheFilePath
+                            );
                             System.out.println(content);
                         } else {
-                            System.out.println("指定されたファイルを読み込む権限がありません。");
+                            System.out.println(
+                                "指定されたファイルを読み込む権限がありません。"
+                            );
                         }
                     } else if (operation.equals("write")) {
-                        if (cacheHandler.isOperationAllowed(cacheFilePath, operation)) {
+                        if (
+                            cacheHandler.isOperationAllowed(
+                                cacheFilePath,
+                                operation
+                            )
+                        ) {
                             String content = keyboard.readLine();
                             cacheHandler.setFileContent(cacheFilePath, content);
                         } else {
-                            System.out.println("指定されたファイルに書き込む権限がありません。");
+                            System.out.println(
+                                "指定されたファイルに書き込む権限がありません。"
+                            );
                         }
                     } else if (operation.equals("close")) {
-                        if (!cacheHandler.getIsFileOpened(cacheFilePath)) continue;
+                        if (
+                            !cacheHandler.getIsFileOpened(cacheFilePath)
+                        ) continue;
 
                         // write
-                        if (cacheHandler.getOpenedFileMode(cacheFilePath).canWrite() && cacheHandler.getIsModified(cacheFilePath)) {
-                            out.writeObject("write" + " " + hostName + " " + filePath);
+                        if (
+                            cacheHandler
+                                .getOpenedFileMode(cacheFilePath)
+                                .canWrite() &&
+                            cacheHandler.getIsModified(cacheFilePath)
+                        ) {
+                            out.writeObject(
+                                "write" + " " + hostName + " " + filePath
+                            );
                             out.flush();
 
-                            File cacheFile = cacheHandler.getFile(cacheFilePath);
+                            File cacheFile = cacheHandler.getFile(
+                                cacheFilePath
+                            );
 
-                            File sendFile = new File(cacheFile.getFileName(), cacheFile.getIsReadAllowed(), cacheFile.getIsWriteAllowed());
+                            File sendFile = new File(
+                                cacheFile.getFileName(),
+                                cacheFile.getIsReadAllowed(),
+                                cacheFile.getIsWriteAllowed()
+                            );
                             sendFile.setFileContent(cacheFile.getFileContent());
 
                             out.writeObject(sendFile);
@@ -171,6 +217,7 @@ public class Client {
      * サーバーから受け取ったメッセージを処理する用のスレッド
      */
     private static class ReceivedObjectHandler implements Runnable {
+
         private final ObjectInputStream in;
         private String openMode;
 
@@ -193,20 +240,30 @@ public class Client {
                         String operation = args[0];
                         String hostName = args[1];
                         String filePath = args[2];
-                        String cacheFilePath = String.format("%s/%s", hostName, filePath);
-                        
+                        String cacheFilePath = String.format(
+                            "%s/%s",
+                            hostName,
+                            filePath
+                        );
+
                         if (operation.equals("invalidate")) {
-                            if (cacheHandler.getFile(cacheFilePath) == null) continue;
+                            if (
+                                cacheHandler.getFile(cacheFilePath) == null
+                            ) continue;
                             System.out.println(receivedCommand);
                             cacheHandler.setIsCacheValid(cacheFilePath, false);
                         }
-                    } else if (receivedObject.getClass() == EntryServerResponse.class) {
-                        EntryServerResponse response = (EntryServerResponse) receivedObject;
+                    } else if (
+                        receivedObject.getClass() == EntryServerResponse.class
+                    ) {
+                        EntryServerResponse response =
+                            (EntryServerResponse) receivedObject;
                         Object data = response.getData();
 
                         // 操作に失敗したとき
                         if (!response.isSuccessful()) {
-                            EntryServerException e = (EntryServerException) data;
+                            EntryServerException e =
+                                (EntryServerException) data;
                             System.out.println(e.getMessage());
                             continue;
                         }
@@ -220,29 +277,57 @@ public class Client {
                                 System.out.println("file opened successfully");
                                 hostName = args[1];
                                 filePath = args[2];
-                                cacheFilePath = String.format("%s/%s", hostName, filePath);
+                                cacheFilePath =
+                                    String.format("%s/%s", hostName, filePath);
                                 this.openMode = args[3];
-                                if (openMode.equals("w") || cacheHandler.getIsCacheValid(cacheFilePath)) {
-                                    cacheHandler.openFile(cacheFilePath, null, Mode.parseMode(this.openMode));
+                                if (
+                                    openMode.equals("w") ||
+                                    cacheHandler.getIsCacheValid(cacheFilePath)
+                                ) {
+                                    cacheHandler.openFile(
+                                        cacheFilePath,
+                                        null,
+                                        Mode.parseMode(this.openMode)
+                                    );
                                 }
                                 break;
                             case READ:
                                 hostName = args[1];
                                 filePath = args[2];
-                                cacheFilePath = String.format("%s/%s", hostName, filePath);
-                                File receivedFile = (data != null) ? (File) data : null;
-                                if (receivedFile != null) System.out.println(new String(receivedFile.getFileContent()));
-                                if (receivedFile == null && this.openMode.equals("r")) {
-                                    System.out.println("存在しないファイルを読み出し権限のみで開くことはできません。");
+                                cacheFilePath =
+                                    String.format("%s/%s", hostName, filePath);
+                                File receivedFile = (data != null)
+                                    ? (File) data
+                                    : null;
+                                if (receivedFile != null) System.out.println(
+                                    new String(receivedFile.getFileContent())
+                                );
+                                if (
+                                    receivedFile == null &&
+                                    this.openMode.equals("r")
+                                ) {
+                                    System.out.println(
+                                        "存在しないファイルを読み出し権限のみで開くことはできません。"
+                                    );
 
                                     // close 処理
                                     cacheHandler.closeFile(cacheFilePath);
 
-                                    out.writeObject("close" + " " + hostName + " " + filePath);
+                                    out.writeObject(
+                                        "close" +
+                                        " " +
+                                        hostName +
+                                        " " +
+                                        filePath
+                                    );
                                     out.flush();
                                     break;
                                 }
-                                cacheHandler.openFile(cacheFilePath, receivedFile, Mode.parseMode(this.openMode));
+                                cacheHandler.openFile(
+                                    cacheFilePath,
+                                    receivedFile,
+                                    Mode.parseMode(this.openMode)
+                                );
                                 break;
                             case WRITE:
                                 System.out.println("file updated successfully");
@@ -252,8 +337,9 @@ public class Client {
                         }
                     }
                 }
-            } catch (SocketException e) {
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (SocketException e) {} catch (
+                IOException | ClassNotFoundException e
+            ) {
                 e.printStackTrace();
             }
         }

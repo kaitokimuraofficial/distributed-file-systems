@@ -1,7 +1,6 @@
 package src.client;
 
 import java.util.ArrayList;
-
 import src.file.Directory;
 import src.file.File;
 
@@ -21,7 +20,7 @@ public class FileCache {
                 "root",
                 new ArrayList<Directory>(),
                 new ArrayList<File>()
-            );       
+            );
     }
 
     /**

@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "prettier:fix:java": "prettier --write 'src/**/*.java'",
+    "prettier:pre-commit": "npm run prettier:fix:java",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "src/**/*.java": "npm run prettier:pre-commit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.4",
+    "prettier-plugin-java": "^2.5.0"
+  }
+}
