@@ -183,7 +183,6 @@ public class Client {
             try {
                 while (true) {
                     Object receivedObject = in.readObject(); // データ受信
-                    System.out.println("receivedObject = " + receivedObject);
 
                     if (receivedObject.getClass() == String.class) {
                         // キャッシュを無効化する処理

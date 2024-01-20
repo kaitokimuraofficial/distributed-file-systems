@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 /**
  * ファイル
- * @author kaitokimuraofficial
+ * @author Kaito Kimura
  * @author Keisuke Nakao
  */
 

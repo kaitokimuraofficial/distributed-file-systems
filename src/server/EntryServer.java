@@ -9,17 +9,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-// import java.util.Date;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-// import java.util.HashMap;
-// import java.util.Map;
-
-// import src.Client.Client;
-// import src.File.File;
 
 /**
  * クライアントと直線通信を行うファイルサーバーのエントリ
@@ -29,10 +22,6 @@ import java.util.Map;
 
 public class EntryServer {
     public static final int PORT = 8080;
-    // private final int BACKLOG;
-    // private final ServerSocket clientEntry;
-    
-    // private Map<Client, Integer> clientIdMap = new HashMap<>();
 
     /** 次のクライアントに対して割り当てるID */
     private static int clientIdCounter = 0;
@@ -91,8 +80,6 @@ public class EntryServer {
 
                 // クライアントIDを送信
                 clientOutputStream.writeObject(clientId);
-
-                // clientOutputStream.writeObject(readFile("localhost", Paths.get("hoge.txt"), clientId));
 
                 // クライアントとの通信をハンドルするスレッドを起動
                 new Thread(new ClientHandler(clientSocket, clientId)).start();

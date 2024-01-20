@@ -7,7 +7,7 @@ import src.file.File;
 
 /**
  * ファイルのキャッシュ
- * @author kaitokimuraofficial
+ * @author Kaito Kimura
  * @author Keisuke Nakao
  */
 
