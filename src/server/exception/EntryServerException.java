@@ -7,6 +7,7 @@ import java.io.Serial;
  * @author Tomoya Aoyagi
  */
 public class EntryServerException extends Exception {
+
     @Serial
     private static final long serialVersionUID = 1L;
 

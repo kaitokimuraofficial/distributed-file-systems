@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FileUserGroup {
+
     private final Set<Integer> readUsers = new HashSet<>();
     private int currentWrite = -1;
 
@@ -56,5 +57,4 @@ public class FileUserGroup {
     public boolean allowWrite(int clientId) {
         return currentWrite == clientId;
     }
-
 }

@@ -1,25 +1,18 @@
 package src.server;
-import src.file.File;
-import src.server.exception.EntryServerException;
-import src.util.Mode;
-import src.util.OperationType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-// import java.util.Date;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-// import java.util.HashMap;
-// import java.util.Map;
-
-// import src.Client.Client;
-// import src.File.File;
+import src.file.File;
+import src.server.exception.EntryServerException;
+import src.util.Mode;
+import src.util.OperationType;
 
 /**
  * クライアントと直線通信を行うファイルサーバーのエントリ
@@ -28,20 +21,19 @@ import java.util.Map;
  */
 
 public class EntryServer {
+
     public static final int PORT = 8080;
-    // private final int BACKLOG;
-    // private final ServerSocket clientEntry;
-    
-    // private Map<Client, Integer> clientIdMap = new HashMap<>();
 
     /** 次のクライアントに対して割り当てるID */
     private static int clientIdCounter = 0;
     /** 接続されているクライアントのStreamを保持 */
-    private static final Map<Integer, ObjectOutputStream> clientStreams = new HashMap<>();
+    private static final Map<Integer, ObjectOutputStream> clientStreams =
+        new HashMap<>();
     /**
      * ファイルサーバー上の各ファイルについて、各ユーザーの権限を管理する
      */
-    private static final Map<String, FileUserGroup> fileUserGroups = new HashMap<>();
+    private static final Map<String, FileUserGroup> fileUserGroups =
+        new HashMap<>();
     /**
      * ファイルサーバー上の各ファイルについて、開かれたあとに書き込まれたかどうかを管理する
      */
@@ -56,7 +48,7 @@ public class EntryServer {
         System.out.println("Setting up local file servers ...");
         final String SERVER_HOSTNAME_BASE = "localhost";
 
-        for (int i = 0; ; i++) {
+        for (int i = 0;; i++) {
             String fsRoot = System.getenv(String.format("FS_ROOT_%d", i));
             if (fsRoot == null) {
                 if (i == 0) {
@@ -69,7 +61,13 @@ public class EntryServer {
 
             FileServer fs = new FileServer(Paths.get(fsRoot));
             fileServers.put(SERVER_HOSTNAME_BASE + i, fs);
-            System.out.println(String.format("Registered: %s -> %s", SERVER_HOSTNAME_BASE + i, fsRoot));
+            System.out.println(
+                String.format(
+                    "Registered: %s -> %s",
+                    SERVER_HOSTNAME_BASE + i,
+                    fsRoot
+                )
+            );
         }
     }
 
@@ -86,13 +84,13 @@ public class EntryServer {
                 System.out.println("新しいクライアントが接続しました.");
 
                 int clientId = clientIdCounter++;
-                ObjectOutputStream clientOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+                ObjectOutputStream clientOutputStream = new ObjectOutputStream(
+                    clientSocket.getOutputStream()
+                );
                 clientStreams.put(clientId, clientOutputStream);
 
                 // クライアントIDを送信
                 clientOutputStream.writeObject(clientId);
-
-                // clientOutputStream.writeObject(readFile("localhost", Paths.get("hoge.txt"), clientId));
 
                 // クライアントとの通信をハンドルするスレッドを起動
                 new Thread(new ClientHandler(clientSocket, clientId)).start();
@@ -101,7 +99,7 @@ public class EntryServer {
             e.printStackTrace();
         }
     }
-    
+
     public static void main(String[] args) {
         launchServer();
     }
@@ -118,7 +116,12 @@ public class EntryServer {
      * @param mode ファイルモード
      * @throws EntryServerException ファイルが他のユーザーによって使用中のため、開くことができない場合
      */
-    private static void openFile(String hostname, Path p, int clientId, Mode mode) throws EntryServerException {
+    private static void openFile(
+        String hostname,
+        Path p,
+        int clientId,
+        Mode mode
+    ) throws EntryServerException {
         String path = joinFilePath(hostname, p);
         FileUserGroup group = fileUserGroups.get(path);
         if (group == null) {
@@ -130,15 +133,18 @@ public class EntryServer {
                 group.addUser(clientId, mode.canRead(), mode.canWrite());
                 fileUserGroups.put(path, group);
             } else {
-                throw new EntryServerException("ファイルが他のユーザーによって使用中のため、書き込みできません。");
+                throw new EntryServerException(
+                    "ファイルが他のユーザーによって使用中のため、書き込みできません。"
+                );
             }
-        }
-        else {
+        } else {
             if (!group.hasCurrentWrite()) {
                 group.addUser(clientId, true, false);
                 fileUserGroups.put(path, group);
             } else {
-                throw new EntryServerException("ファイルが他のユーザーによって使用中のため、開くことができません。");
+                throw new EntryServerException(
+                    "ファイルが他のユーザーによって使用中のため、開くことができません。"
+                );
             }
         }
 
@@ -170,7 +176,8 @@ public class EntryServer {
      * @param clientId クライアントID
      * @return 読み込んだファイル
      */
-    private static File readFile(String hostname, Path p, int clientId) throws EntryServerException {
+    private static File readFile(String hostname, Path p, int clientId)
+        throws EntryServerException {
         String path = joinFilePath(hostname, p);
         FileUserGroup group = fileUserGroups.get(path);
 
@@ -178,7 +185,9 @@ public class EntryServer {
             FileServer fileServer = fileServers.get(hostname);
             return fileServer != null ? fileServer.readFile(p) : null;
         } else {
-            throw new EntryServerException("指定されたファイルを開く権限がありません。");
+            throw new EntryServerException(
+                "指定されたファイルを開く権限がありません。"
+            );
         }
     }
 
@@ -190,7 +199,12 @@ public class EntryServer {
      * @param superFile 書き込むファイル
      * @return 書き込みに成功すればtrue、失敗すればfalse
      */
-    private static boolean writeFile(String hostname, Path p, int clientId, File superFile) throws EntryServerException {
+    private static boolean writeFile(
+        String hostname,
+        Path p,
+        int clientId,
+        File superFile
+    ) throws EntryServerException {
         String path = joinFilePath(hostname, p);
         FileUserGroup group = fileUserGroups.get(path);
 
@@ -202,7 +216,9 @@ public class EntryServer {
             }
             return false;
         } else {
-            throw new EntryServerException("指定されたファイルに書き込む権限がありません。");
+            throw new EntryServerException(
+                "指定されたファイルに書き込む権限がありません。"
+            );
         }
     }
 
@@ -210,6 +226,7 @@ public class EntryServer {
      * 接続された単一のクライアントについてメッセージの送受信を行うクラス
      * */
     private static class ClientHandler implements Runnable {
+
         private final Socket clientSocket;
         private final int clientId;
 
@@ -222,19 +239,37 @@ public class EntryServer {
          * 引数の数が合っていないときの例外処理
          * @throws IOException
          */
-        private void throwArgumentMismatchError(OperationType opType, String receivedCommand) throws IOException {
-            EntryServerException e = new EntryServerException("引数の数が不正です。");
-            clientStreams.get(clientId).writeObject(EntryServerResponse.error(opType, receivedCommand, e));
+        private void throwArgumentMismatchError(
+            OperationType opType,
+            String receivedCommand
+        ) throws IOException {
+            EntryServerException e = new EntryServerException(
+                "引数の数が不正です。"
+            );
+            clientStreams
+                .get(clientId)
+                .writeObject(
+                    EntryServerResponse.error(opType, receivedCommand, e)
+                );
             clientStreams.get(clientId).flush();
         }
 
         @Override
         public void run() {
-            try (ObjectInputStream clientInputStream = new ObjectInputStream(clientSocket.getInputStream())) {
+            try (
+                ObjectInputStream clientInputStream = new ObjectInputStream(
+                    clientSocket.getInputStream()
+                )
+            ) {
                 while (true) {
                     // クライアントからオブジェクトを受信
                     Object receivedObject = clientInputStream.readObject();
-                    System.out.println("クライアント " + clientId + " からオブジェクトを受信: " + receivedObject);
+                    System.out.println(
+                        "クライアント " +
+                        clientId +
+                        " からオブジェクトを受信: " +
+                        receivedObject
+                    );
 
                     // 受け取ったオブジェクトが文字列型の場合
                     if (receivedObject.getClass() == String.class) {
@@ -249,16 +284,35 @@ public class EntryServer {
                             case "read":
                                 // read [hostname] [path]
                                 if (rpc.length < 3) {
-                                    throwArgumentMismatchError(OperationType.READ, message);
+                                    throwArgumentMismatchError(
+                                        OperationType.READ,
+                                        message
+                                    );
                                     break;
                                 }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 try {
                                     File file = readFile(hostname, p, clientId);
-                                    clientStreams.get(clientId).writeObject(EntryServerResponse.ok(OperationType.READ, message, file));
+                                    clientStreams
+                                        .get(clientId)
+                                        .writeObject(
+                                            EntryServerResponse.ok(
+                                                OperationType.READ,
+                                                message,
+                                                file
+                                            )
+                                        );
                                 } catch (EntryServerException e) {
-                                    clientStreams.get(clientId).writeObject(EntryServerResponse.error(OperationType.READ, message, e));
+                                    clientStreams
+                                        .get(clientId)
+                                        .writeObject(
+                                            EntryServerResponse.error(
+                                                OperationType.READ,
+                                                message,
+                                                e
+                                            )
+                                        );
                                 }
                                 clientStreams.get(clientId).flush();
                                 break;
@@ -266,24 +320,51 @@ public class EntryServer {
                                 // write [hostname] [path]
                                 // [data]
                                 if (rpc.length < 3) {
-                                    throwArgumentMismatchError(OperationType.WRITE, message);
+                                    throwArgumentMismatchError(
+                                        OperationType.WRITE,
+                                        message
+                                    );
                                     break;
                                 }
                                 hostname = rpc[1];
                                 p = Paths.get(rpc[2]);
                                 Object data = clientInputStream.readObject();
                                 try {
-                                    boolean res = writeFile(hostname, p, clientId, (File) data);
-                                    clientStreams.get(clientId).writeObject(EntryServerResponse.ok(OperationType.WRITE, message, res));
+                                    boolean res = writeFile(
+                                        hostname,
+                                        p,
+                                        clientId,
+                                        (File) data
+                                    );
+                                    clientStreams
+                                        .get(clientId)
+                                        .writeObject(
+                                            EntryServerResponse.ok(
+                                                OperationType.WRITE,
+                                                message,
+                                                res
+                                            )
+                                        );
                                 } catch (EntryServerException e) {
-                                    clientStreams.get(clientId).writeObject(EntryServerResponse.error(OperationType.WRITE, message, e));
+                                    clientStreams
+                                        .get(clientId)
+                                        .writeObject(
+                                            EntryServerResponse.error(
+                                                OperationType.WRITE,
+                                                message,
+                                                e
+                                            )
+                                        );
                                 }
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "open":
                                 // open [hostname] [path] [mode]
                                 if (rpc.length < 4) {
-                                    throwArgumentMismatchError(OperationType.OPEN, message);
+                                    throwArgumentMismatchError(
+                                        OperationType.OPEN,
+                                        message
+                                    );
                                     break;
                                 }
                                 hostname = rpc[1];
@@ -292,16 +373,35 @@ public class EntryServer {
                                 if (mode == null) break;
                                 try {
                                     openFile(hostname, p, clientId, mode);
-                                    clientStreams.get(clientId).writeObject(EntryServerResponse.ok(OperationType.OPEN, message, true));
+                                    clientStreams
+                                        .get(clientId)
+                                        .writeObject(
+                                            EntryServerResponse.ok(
+                                                OperationType.OPEN,
+                                                message,
+                                                true
+                                            )
+                                        );
                                 } catch (EntryServerException e) {
-                                    clientStreams.get(clientId).writeObject(EntryServerResponse.error(OperationType.OPEN, message, e));
+                                    clientStreams
+                                        .get(clientId)
+                                        .writeObject(
+                                            EntryServerResponse.error(
+                                                OperationType.OPEN,
+                                                message,
+                                                e
+                                            )
+                                        );
                                 }
                                 clientStreams.get(clientId).flush();
                                 break;
                             case "close":
                                 // close [hostname] [path]
                                 if (rpc.length < 3) {
-                                    throwArgumentMismatchError(OperationType.CLOSE, message);
+                                    throwArgumentMismatchError(
+                                        OperationType.CLOSE,
+                                        message
+                                    );
                                     break;
                                 }
                                 hostname = rpc[1];
@@ -310,8 +410,19 @@ public class EntryServer {
                                 // closeしたユーザーがwrite権限を持っていたら、他のユーザーのキャッシュを無効にする
                                 String path = joinFilePath(hostname, p);
                                 FileUserGroup group = fileUserGroups.get(path);
-                                if (group != null && group.allowWrite(clientId) && isDirty.get(path)) {
-                                    broadcastObject(clientId, String.format("invalidate %s %s", hostname, p));
+                                if (
+                                    group != null &&
+                                    group.allowWrite(clientId) &&
+                                    isDirty.get(path)
+                                ) {
+                                    broadcastObject(
+                                        clientId,
+                                        String.format(
+                                            "invalidate %s %s",
+                                            hostname,
+                                            p
+                                        )
+                                    );
                                 }
 
                                 closeFile(hostname, p, clientId);
@@ -324,11 +435,16 @@ public class EntryServer {
                 }
             } catch (IOException | ClassNotFoundException e) {
                 // クライアントが切断された場合の処理
-                System.out.println("クライアント " + clientId + " が切断されました.");
+                System.out.println(
+                    "クライアント " + clientId + " が切断されました."
+                );
                 clientStreams.remove(clientId);
 
                 // closeされていないファイルをcloseする
-                for (Map.Entry<String, FileUserGroup> entry : fileUserGroups.entrySet()) {
+                for (Map.Entry<
+                    String,
+                    FileUserGroup
+                > entry : fileUserGroups.entrySet()) {
                     FileUserGroup group = entry.getValue();
                     group.removeUser(clientId);
                 }
@@ -341,11 +457,15 @@ public class EntryServer {
          * @param object 送信するObject
          */
         private void broadcastObject(int senderClientId, Object object) {
-            for (Map.Entry<Integer, ObjectOutputStream> entry : clientStreams.entrySet()) {
+            for (Map.Entry<
+                Integer,
+                ObjectOutputStream
+            > entry : clientStreams.entrySet()) {
                 int receiverClientId = entry.getKey();
                 if (receiverClientId != senderClientId) {
                     try {
-                        ObjectOutputStream receiverOutputStream = entry.getValue();
+                        ObjectOutputStream receiverOutputStream =
+                            entry.getValue();
                         receiverOutputStream.writeObject(object);
                         receiverOutputStream.flush();
                     } catch (IOException e) {
