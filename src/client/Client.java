@@ -26,45 +26,6 @@ public class Client {
 
     private Client() {}
 
-    public boolean open(String filePath, File serverFile, Mode fileMode) {
-        return cacheHandler.openFile(filePath, serverFile, fileMode);
-    }
-
-    public boolean close(String filePath) {
-        return cacheHandler.closeFile(filePath);
-    }
-
-    /**
-    * readメソッド
-    * Fileの内容を表示する
-    * ClientがあるFileの内容を表示したい場面
-    * @param filePath 見つけたいFileのパス
-    * @return void
-    */
-    public void read(String filePath) {
-        String fileContent = cacheHandler.getFileContent(filePath);
-        System.out.println(fileContent);
-    }
-
-    /**
-    * writeメソッド
-    * Fileの内容をString変換して返す
-    * ClientがあるFileの内容を書き換える場面
-    * @param fileName 見つけたいFileのパス
-    * @param text Fileに書き込みたい内容
-    * @return void
-    */
-    public void write(String filePath, String text) {
-        int res = cacheHandler.setFileContent(filePath, text);
-
-        // cacheHandlerがsetFileContent()に失敗した
-        if (res<0) {
-            System.out.println("Failed to write");
-            return;
-        }
-        System.out.println("Success!");
-    }
-
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         InetAddress addr = InetAddress.getByName("localhost"); // IP アドレスへの変換
         System.out.println("addr = " + addr);
@@ -216,7 +177,7 @@ public class Client {
 
                         switch (response.getOpType()) {
                             case OPEN:
-                                System.out.println("file opened successfully");
+                                System.out.println("ファイルが正常に開かれました。");
                                 hostName = args[1];
                                 filePath = args[2];
                                 cacheFilePath = String.format("%s/%s", hostName, filePath);
@@ -244,7 +205,7 @@ public class Client {
                                 cacheHandler.openFile(cacheFilePath, receivedFile, Mode.parseMode(this.openMode));
                                 break;
                             case WRITE:
-                                System.out.println("file updated successfully");
+                                System.out.println("ファイルが正常に更新されました。");
                                 break;
                             default:
                                 break;
