@@ -26,7 +26,7 @@ sequenceDiagram
   participant ES as EntryServer　
   participant FS as FileServer
 
-  C->>+CH: close [host] [file]
+  C->>+CH: close [host] [path]
   CH->>FC: close(filePath)
   FC-->>CH: return File
   CH-->>-C: return File
