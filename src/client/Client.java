@@ -191,7 +191,7 @@ public class Client {
                                 filePath = args[2];
                                 cacheFilePath = String.format("%s/%s", hostName, filePath);
                                 File receivedFile = (data != null) ? (File) data : null;
-                                if (receivedFile != null) System.out.println(new String(receivedFile.getFileContent()));
+                                if (receivedFile != null) System.out.println("サーバからファイルを取得しました。");
                                 if (receivedFile == null && this.openMode.equals("r")) {
                                     System.out.println("存在しないファイルを読み出し権限のみで開くことはできません。");
 
