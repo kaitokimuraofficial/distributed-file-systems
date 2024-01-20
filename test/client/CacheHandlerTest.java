@@ -2,7 +2,6 @@ package test.client;
 
 import static org.junit.Assert.*;
 
-import java.nio.file.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

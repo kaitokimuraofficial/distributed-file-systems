@@ -48,7 +48,7 @@ public class CacheHandler {
         if (openedFiles.containsKey(filePath)) return true;
         File targetFile = this.getFile(filePath);
 
-        if (targetFile == null || !targetFile.getIsCacheValid()) {
+        if (targetFile == null || !this.getIsCacheValid(filePath)) {
             File file;
             Path p = Paths.get(filePath);
             file =
@@ -57,6 +57,7 @@ public class CacheHandler {
                     : serverFile;
 
             fileCache.setFile(filePath, file);
+            this.setIsModified(filePath, false);
         }
 
         openedFiles.put(filePath, fileMode);
@@ -101,6 +102,12 @@ public class CacheHandler {
         return len;
     }
 
+    public boolean getIsCacheValid(String filePath) {
+        File targetFile = this.getFile(filePath);
+        if (targetFile == null) return false;
+        return targetFile.getIsCacheValid();
+    }
+
     /**
      * setIsCacheValidメソッド
      * FileのisCacheValidを変更する
@@ -111,6 +118,20 @@ public class CacheHandler {
         File targetFile = this.getFile(filePath);
         if (targetFile == null) return false;
         targetFile.setIsCacheValid(bool);
+        this.fileCache.setFile(filePath, targetFile);
+        return true;
+    }
+
+    public boolean getIsModified(String filePath) {
+        File targetFile = this.getFile(filePath);
+        if (targetFile == null) return false;
+        return targetFile.getIsModified();
+    }
+
+    public boolean setIsModified(String filePath, boolean bool) {
+        File targetFile = this.getFile(filePath);
+        if (targetFile == null) return false;
+        targetFile.setIsModified(bool);
         this.fileCache.setFile(filePath, targetFile);
         return true;
     }
@@ -127,5 +148,9 @@ public class CacheHandler {
 
     public Mode getOpenedFileMode(String filePath) {
         return openedFiles.get(filePath);
+    }
+
+    public boolean getIsFileOpened(String filePath) {
+        return openedFiles.containsKey(filePath);
     }
 }

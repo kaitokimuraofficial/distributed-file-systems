@@ -19,6 +19,7 @@ public class File implements Serializable {
     private boolean isReadAllowed;
     private boolean isWriteAllowed;
     private boolean isCacheValid;
+    private boolean isModified;
     private int lastPosition = -1;
 
     public File(
@@ -30,6 +31,7 @@ public class File implements Serializable {
         this.isReadAllowed = isReadAllowed;
         this.isWriteAllowed = isWriteAllowed;
         this.isCacheValid = true;
+        this.isModified = false;
     }
 
     // getter method
@@ -43,6 +45,10 @@ public class File implements Serializable {
 
     public boolean getIsWriteAllowed() {
         return isWriteAllowed;
+    }
+
+    public boolean getIsModified() {
+        return isModified;
     }
 
     public boolean getIsCacheValid() {
@@ -90,6 +96,10 @@ public class File implements Serializable {
         this.isCacheValid = isCacheValid;
     }
 
+    public void setIsModified(boolean isModified) {
+        this.isModified = isModified;
+    }
+
     private void setLastPosition(int lastPosition) {
         this.lastPosition = lastPosition;
     }
@@ -104,6 +114,12 @@ public class File implements Serializable {
         if (isWriteAllowed == false) {
             return -1;
         }
+
+        if (Arrays.equals(this.getFileContent(), byteData)) {
+            return this.lastPosition;
+        }
+
+        setIsModified(true);
 
         for (int i = 0; i < byteData.length; i++) {
             if (i < DEFAULTSIZE) {
