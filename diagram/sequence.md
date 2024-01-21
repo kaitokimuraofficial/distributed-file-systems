@@ -1,4 +1,4 @@
-# Clientがサーバーからファイルを取得する
+# クライアントがサーバからファイルを取得する
 ```mermaid
 sequenceDiagram
 
@@ -16,7 +16,7 @@ sequenceDiagram
   CH->>FC: setFile(path, file)
 ```
 
-# キャッシュからサーバーにファイルを戻す
+# キャッシュに対する変更内容をサーバに反映する
 ```mermaid
 sequenceDiagram
 
@@ -34,7 +34,7 @@ sequenceDiagram
   ES->>FS: ファイルの変更を反映させる
 ```
 
-# Clientがファイルをreadする
+# クライアントがファイルの内容を読み出す
 ```mermaid
 sequenceDiagram
 
@@ -50,7 +50,7 @@ sequenceDiagram
   CH-->>-C:  return String
 ```
 
-# ClientがFileをwriteする
+# クライアントがファイルの内容を書き換える
 ```mermaid
 sequenceDiagram
 
