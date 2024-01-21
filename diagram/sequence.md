@@ -13,7 +13,7 @@ sequenceDiagram
   FS-->>ES: return File
   ES-->>-C: return File
   C->>CH: キャッシュにFileを保存させる
-  CH->>FC: setFile(path, file)
+  CH->>FC: setFile(filePath, file)
 ```
 
 # キャッシュに対する変更内容をサーバに反映する
@@ -41,12 +41,13 @@ sequenceDiagram
   actor C as Client
   participant CH as CacheHandler
   participant FC as FileCache
+  participant F as File
 
   C->>+CH: getFileContent(filePath)
   CH->>+FC: getFile(filePath)
   FC->>-CH: return File
-  CH->>+FC: getFileContent()
-  FC->>-CH: return String
+  CH->>+F: getFileContent()
+  F->>-CH: return String
   CH-->>-C:  return String
 ```
 
@@ -57,11 +58,14 @@ sequenceDiagram
   actor C as Client
   participant CH as CacheHandler
   participant FC as FileCache
+  participant F as File
 
   C->>+CH: setFileContent(filePath, content)
   CH->>+FC: getFile(filePath)
   FC->>-CH: return File
-  CH->>+FC: setFileContent(content)
-  FC-->>-CH: return int
+  CH->>+F: setFileContent(content)
+  F-->>-CH: return int
+  CH->>+FC: setFile(filePath, file)
+  FC->>-CH: return
   CH-->>-C:  return 
 ```
