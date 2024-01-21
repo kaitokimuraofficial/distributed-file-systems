@@ -8,12 +8,12 @@ sequenceDiagram
   participant ES as EntryServer　
   participant FS as FileServer
 
-  C->>+ES: open [host] [path] [mode]
-  ES->>FS: getFile(filePath)
+  C->>+ES: read [host] [path] [mode]
+  ES->>FS: readFile(host, path, clientId)
   FS-->>ES: return File
   ES-->>-C: return File
   C->>CH: キャッシュにFileを保存させる
-  CH->>FC: ファイルを保存する
+  CH->>FC: setFile(path, file)
 ```
 
 # キャッシュからサーバーにファイルを戻す
@@ -26,15 +26,15 @@ sequenceDiagram
   participant ES as EntryServer　
   participant FS as FileServer
 
-  C->>+CH: close [host] [path]
-  CH->>FC: close(filePath)
+  C->>+CH: キャッシュからファイルを取得する
+  CH->>FC: getFile(filePath)
   FC-->>CH: return File
   CH-->>-C: return File
-  C->>ES: ファイルを返す
+  C->>ES: write [host] [path]
   ES->>FS: ファイルの変更を反映させる
 ```
 
-# ClientがファイルをReadする
+# Clientがファイルをreadする
 ```mermaid
 sequenceDiagram
 
@@ -42,8 +42,10 @@ sequenceDiagram
   participant CH as CacheHandler
   participant FC as FileCache
 
-  C->>+CH: Read(filePath)
-  CH->>+FC: getFileContent(filePath)
+  C->>+CH: getFileContent(filePath)
+  CH->>+FC: getFile(filePath)
+  FC->>-CH: return File
+  CH->>+FC: getFileContent()
   FC->>-CH: return String
   CH-->>-C:  return String
 ```
@@ -56,8 +58,10 @@ sequenceDiagram
   participant CH as CacheHandler
   participant FC as FileCache
 
-  C->>+CH: write(filePath)
-  CH->>+FC: setFileContent(filePath, text)
+  C->>+CH: setFileContent(filePath, content)
+  CH->>+FC: getFile(filePath)
+  FC->>-CH: return File
+  CH->>+FC: setFileContent(content)
   FC-->>-CH: return int
   CH-->>-C:  return 
 ```
